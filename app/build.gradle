@@ -1,0 +1,32 @@
+apply plugin: 'application'
+mainClassName = 'myproject.meetup.contentful.fullstack.Main'
+
+group 'myproject.meetup.meetup'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+jar {
+    manifest {
+        attributes('provider': 'gradle', 'Main-Class': 'myproject.meetup.contentful.fullstack.Main')
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE")
+    compile("com.contentful.java:java-sdk:7.2.0")
+//    compile("com.github.mjeanroy:springmvc-mustache:0.5.3")
+//    compile("com.github.spullara.mustache.java:compiler:0.9.4")
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+springBoot {
+    mainClass = mainClassName
+}
+
+build.dependsOn(installDist)

@@ -1,0 +1,8 @@
+{
+  "name": "Contentful Java Fullstack",
+  "description": "Get started using Contentful, Spring Boot Java and Neo4j",
+  "repository": "https://github.com/yangguangjun123/contentful-java-fullstack",
+  "website": "https://contentful.com",
+  "logo": "",
+  "keywords": ["java", "spring", "spring boot", "contentful", "neo4j", "getting started", "guide"]
+}
