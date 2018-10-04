@@ -1,14 +1,14 @@
 apply plugin: 'application'
-mainClassName = 'myproject.meetup.contentful.fullstack.Main'
+mainClassName = 'myproject.meetup.contentful.productcatalog.Main'
 
-group 'myproject.meetup.meetup'
+group 'myproject.meetup'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
 jar {
     manifest {
-        attributes('provider': 'gradle', 'Main-Class': 'myproject.meetup.contentful.fullstack.Main')
+        attributes('provider': 'gradle', 'Main-Class': 'myproject.meetup.contentful.productcatalog.Main')
     }
 }
 
