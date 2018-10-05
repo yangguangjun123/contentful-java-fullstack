@@ -3,7 +3,7 @@ package myproject.meetup.contentful.productcatalog;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import myproject.meetup.contentful.productcatalog.api.ContentfulController;
-import myproject.meetup.contentful.productcatalog.web.ContentfulWebController;
+import myproject.meetup.contentful.productcatalog.web.ProductWebController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ public class SmokeTest {
     private ContentfulController contentfulController;
 
     @Autowired
-    private ContentfulWebController contentfulWebController;
+    private ProductWebController contentfulWebController;
 
     @Test
     public void shouldLoadContext() throws Exception {
