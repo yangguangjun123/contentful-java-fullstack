@@ -1,20 +1,21 @@
-subprojects {
-    repositories {
-        mavenCentral()
-    }
-}
-
 buildscript {
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.2.RELEASE")
-    }
+    repositories { mavenCentral() }
 }
-apply plugin: 'org.springframework.boot'
+
+plugins { id "io.spring.dependency-management" version "1.0.4.RELEASE" }
+
+ext { springBootVersion = '2.0.5.RELEASE' }
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_10
+targetCompatibility = JavaVersion.VERSION_1_10
 
 wrapper {
     gradleVersion = '4.8'

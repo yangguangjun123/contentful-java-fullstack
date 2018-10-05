@@ -4,7 +4,8 @@ mainClassName = 'myproject.meetup.contentful.productcatalog.Main'
 group 'myproject.meetup'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_1_10
+targetCompatibility = JavaVersion.VERSION_1_10
 
 jar {
     manifest {
@@ -17,16 +18,13 @@ repositories {
 }
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE")
-    compile("com.contentful.java:java-sdk:7.2.0")
-//    compile("com.github.mjeanroy:springmvc-mustache:0.5.3")
-//    compile("com.github.spullara.mustache.java:compiler:0.9.4")
-    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.5.RELEASE'
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.5.RELEASE'
 }
 
-springBoot {
-    mainClass = mainClassName
-}
+
+//springBoot {
+//    mainClass = mainClassName
+//}
 
 build.dependsOn(installDist)
