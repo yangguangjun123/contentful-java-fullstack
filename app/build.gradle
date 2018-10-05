@@ -23,8 +23,8 @@ dependencies {
 }
 
 
-//springBoot {
-//    mainClass = mainClassName
-//}
+springBoot {
+    mainClassName = 'myproject.meetup.contentful.productcatalog.Main'
+}
 
 build.dependsOn(installDist)
