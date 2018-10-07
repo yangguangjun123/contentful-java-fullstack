@@ -18,8 +18,13 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.5.RELEASE'
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.5.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: "${springBootVersion}"
+    compile 'com.contentful.java:java-sdk:10.0.0'
+    compile 'com.contentful.java:cma-sdk:3.1.0'
+    compile group: 'org.json', name: 'json', version: '20180813'
+    testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springBootVersion}") {
+        exclude group: "com.vaadin.external.google", module:"android-json"
+    }
 }
 
 
@@ -28,3 +33,34 @@ springBoot {
 }
 
 build.dependsOn(installDist)
+
+// setup separate integration tests
+sourceSets {
+    intTest {
+        java.srcDir file('src/intTest/java')
+        resources.srcDir file('src/intTest/resources')
+        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations {
+//    intTestImplementation.extendsFrom implementation
+    intTestImplementation.extendsFrom testImplementation
+}
+
+//dependencies {
+//    intTestImplementation 'junit:junit:4.12'
+//}
+
+task integrationTest(type: Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.intTest.output.classesDirs
+    classpath = sourceSets.intTest.runtimeClasspath
+    mustRunAfter test
+}
+
+check.dependsOn integrationTest
+

@@ -3,6 +3,7 @@ package myproject.meetup.contentful.productcatalog;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import myproject.meetup.contentful.productcatalog.api.ContentfulController;
+import myproject.meetup.contentful.productcatalog.config.ContentfulProperties;
 import myproject.meetup.contentful.productcatalog.web.ProductWebController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,9 +21,13 @@ public class SmokeTest {
     @Autowired
     private ProductWebController contentfulWebController;
 
+    @Autowired
+    private ContentfulProperties contentfulProperties;
+
     @Test
     public void shouldLoadContext() throws Exception {
         assertThat(contentfulController).isNotNull();
         assertThat(contentfulWebController).isNotNull();
+        assertThat(contentfulProperties).isNotNull();
     }
 }

@@ -16,8 +16,8 @@ public class ContentfulControllerTest {
     @InjectMocks
     private ContentfulController contentfulController;
 
-    @Autowired
-    private String spaceId;
+//    @Autowired
+//    private String spaceId;
 
     private MockMvc mockMvc;
 
