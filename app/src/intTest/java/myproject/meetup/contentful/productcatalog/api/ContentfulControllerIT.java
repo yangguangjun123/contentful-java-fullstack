@@ -123,7 +123,7 @@ public class ContentfulControllerIT {
         map.add("organisation", contefulProperties.getWorkshopOrganisationName());
         HttpEntity<Object> entity = new HttpEntity(map, headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/create/objectKey/");
-        restUrlBuilder.append(contefulProperties.getWorkshopSpaceName());
+        restUrlBuilder.append("Copy of Product Catalogue");
         restUrlBuilder.append("/");
         restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
         restUrlBuilder.append("/");
