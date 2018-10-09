@@ -22,6 +22,9 @@ public class ContentfulProperties {
     @Value("${contentful.workshop.management.access.token}")
     private String workshopManagementAccessToken;
 
+    @Value("${contentful.workshop.space.environment}")
+    private String workshopSpaceEnvironment;
+
     public String getWorkshopDeliveryAccessToken() {
         return workshopDeliveryAccessToken;
     }
@@ -52,5 +55,13 @@ public class ContentfulProperties {
 
     public void setWorkshopOrganisationName(String workshopOrganisationName) {
         this.workshopOrganisationName = workshopOrganisationName;
+    }
+
+    public String getWorkshopSpaceEnvironment() {
+        return workshopSpaceEnvironment;
+    }
+
+    public void setWorkshopSpaceEnvironment(String workshopSpaceEnvironment) {
+        this.workshopSpaceEnvironment = workshopSpaceEnvironment;
     }
 }

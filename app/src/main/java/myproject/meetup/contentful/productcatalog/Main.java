@@ -16,7 +16,7 @@ public class Main {
 
         SpringApplication.run(Main.class, args);
 
-        logger.info("Contentful Java Fullstack Application Completes ...");
+        logger.info("Staring Contentful Java Fullstack Application Completes ...");
 
     }
 }

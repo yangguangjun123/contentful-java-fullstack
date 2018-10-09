@@ -75,6 +75,18 @@ public class ContentfulController {
         return response.toString();
     }
 
+    /**
+     * This method is called by Contentful Webhook when a space is added or deleted
+     * so the space cach can be updated
+     *
+     */
+    @RequestMapping(path = "/space/updateCach", method= RequestMethod.PUT)
+    public String updateSpaceCach() {
+        contentfulSpaceService.init();
+        JSONObject response = new JSONObject();
+        response.put("result", "success");
+        return response.toString();
+    }
 
     @RequestMapping(path = "/contenttype/get/objectKey/{spaceName}/{accessToken}/{environment}",
                             method= RequestMethod.GET)

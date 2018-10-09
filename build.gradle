@@ -10,9 +10,12 @@ buildscript {
     }
 }
 
-plugins { id "io.spring.dependency-management" version "1.0.4.RELEASE" }
 
-apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
+//plugins { id "io.spring.dependency-management" version "1.0.4.RELEASE" }
+//apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'

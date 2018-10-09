@@ -8,6 +8,8 @@ import org.neo4j.driver.v1.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class Neo4jService {
 
@@ -25,5 +27,9 @@ public class Neo4jService {
         try (Session session = driver.session()) {
             session.run("MATCH (n) DETACH DELETE n");
         }
+    }
+
+    public void execute(List<String> cypherStatements) {
+
     }
 }

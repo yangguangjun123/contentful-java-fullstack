@@ -19,6 +19,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -40,7 +41,7 @@ public class ContentfulControllerIT {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    private ContentfulProperties contefulProperties;
+    private ContentfulProperties contentfulProperties;
 
     private HttpHeaders headers = new HttpHeaders();
     private String productCatalogueSpaceId;
@@ -52,11 +53,11 @@ public class ContentfulControllerIT {
         if(Objects.isNull(productCatalogueSpaceId)) {
             HttpEntity<String> entity = new HttpEntity(null, headers);
             StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/get/objectKey/");
-            restUrlBuilder.append(contefulProperties.getWorkshopSpaceName());
+            restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
             restUrlBuilder.append("/");
-            restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
+            restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
             restUrlBuilder.append("/");
-            restUrlBuilder.append("master");
+            restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
             ResponseEntity<String> response = restTemplate.exchange(
                     createURLWithPort(restUrlBuilder.toString()),
                     HttpMethod.GET, entity, String.class);
@@ -75,11 +76,11 @@ public class ContentfulControllerIT {
         logger.info("shouldReturnContentfulSpaceByName");
         HttpEntity<String> entity = new HttpEntity(null, headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/get/objectKey/");
-        restUrlBuilder.append(contefulProperties.getWorkshopSpaceName());
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append("master");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
 
         // when
         ResponseEntity<String> response = restTemplate.exchange(
@@ -89,12 +90,13 @@ public class ContentfulControllerIT {
         // verify
         JSONObject jsonObject = new JSONObject(response.getBody());
         logger.info("json response: " + jsonObject);
-        assertEquals(contefulProperties.getWorkshopSpaceName(), jsonObject.getString("name"));
+        assertEquals(contentfulProperties.getWorkshopSpaceName(), jsonObject.getString("name"));
         assertTrue(jsonObject.getString("id").length() > 0);
     }
 
     @Test
     public void shouldDeleteContentfulSpaceByName() {
+        // given
         logger.info("shouldDeleteContentfulSpaceByName");
         createContentfulSpace("Copy of Product Catalogue");
         HttpEntity<String> entity = new HttpEntity(null, headers);
@@ -102,9 +104,9 @@ public class ContentfulControllerIT {
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/delete/objectKey/");
         restUrlBuilder.append("Copy of Product Catalogue");
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append("master");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
 
         // when
         ResponseEntity<String> response = restTemplate.exchange(
@@ -116,18 +118,33 @@ public class ContentfulControllerIT {
     }
 
     @Test
+    public void shouldUpdateContentfulSpaceCach() {
+        // given
+        HttpEntity<String> entity = new HttpEntity(null, headers);
+        String expected = "{result:success}";
+
+        // when
+        ResponseEntity<String> response = restTemplate.exchange(
+                createURLWithPort("/contentful/space/updateCach"),
+                HttpMethod.PUT, entity, String.class);
+
+        // verify
+        JSONAssert.assertEquals(expected, response.getBody(), false);
+    }
+
+    @Test
     public void shouldCreateContentfulSpaceForGivenNameAndOrganisation() {
         logger.info("shouldCreateContentfulSpaceForGivenNameAndOrganisation");
         deleteContentfulSpace("Copy of Product Catalogue");
         MultiValueMap<String, String> map = new LinkedMultiValueMap();
-        map.add("organisation", contefulProperties.getWorkshopOrganisationName());
+        map.add("organisation", contentfulProperties.getWorkshopOrganisationName());
         HttpEntity<Object> entity = new HttpEntity(map, headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/create/objectKey/");
         restUrlBuilder.append("Copy of Product Catalogue");
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append("master");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
 
         // when
         ResponseEntity<String> response = restTemplate.exchange(
@@ -137,7 +154,7 @@ public class ContentfulControllerIT {
         // verify
         JSONObject jsonObject = new JSONObject(response.getBody());
         logger.info("json response: " + jsonObject);
-        assertEquals(contefulProperties.getWorkshopSpaceName(), jsonObject.getString("name"));
+        assertEquals("Copy of Product Catalogue", jsonObject.getString("name"));
         assertTrue(jsonObject.getString("id").length() > 0);
         deleteContentfulSpace("Copy of Product Catalogue");
     }
@@ -147,11 +164,11 @@ public class ContentfulControllerIT {
         // given
         HttpEntity<String> entity = new HttpEntity(null, headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contenttype/get/objectKey/");
-        restUrlBuilder.append(contefulProperties.getWorkshopSpaceName());
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append("master");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
 
         // when
         ResponseEntity<String> response = restTemplate.exchange(
@@ -166,7 +183,7 @@ public class ContentfulControllerIT {
                     .map(s -> (Map<String,?>) s)
                     .forEach( o -> {
                         assertEquals(productCatalogueSpaceId, o.get("spaceId"));
-                        assertEquals("master", o.get("environmentId"));
+                        assertEquals(contentfulProperties.getWorkshopSpaceEnvironment(), o.get("environmentId"));
                         assertTrue(((String) o.get("id")).length() > 0);
                         assertTrue(((String) o.get("name")).length() > 0);
                     });
@@ -177,11 +194,11 @@ public class ContentfulControllerIT {
         // given
         HttpEntity<String> entity = new HttpEntity(null, headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contententry/get/objectKey/");
-        restUrlBuilder.append(contefulProperties.getWorkshopSpaceName());
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append("master");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
 
         // when
         ResponseEntity<String> response = restTemplate.exchange(
@@ -196,7 +213,7 @@ public class ContentfulControllerIT {
                 .map(s -> (Map<String,?>) s)
                 .forEach( o -> {
                     assertEquals(productCatalogueSpaceId, o.get("spaceId"));
-                    assertEquals("master", o.get("environmentId"));
+                    assertEquals(contentfulProperties.getWorkshopSpaceEnvironment(), o.get("environmentId"));
                     assertTrue(((String) o.get("id")).length() > 0);
                 });
     }
@@ -206,11 +223,11 @@ public class ContentfulControllerIT {
         // given
         HttpEntity<String> entity = new HttpEntity(null, headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contentasset/get/objectKey/");
-        restUrlBuilder.append(contefulProperties.getWorkshopSpaceName());
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append("master");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
 
         // when
         ResponseEntity<String> response = restTemplate.exchange(
@@ -225,7 +242,7 @@ public class ContentfulControllerIT {
                 .map(s -> (Map<String,?>) s)
                 .forEach( o -> {
                     assertEquals(productCatalogueSpaceId, o.get("spaceId"));
-                    assertEquals("master", o.get("environmentId"));
+                    assertEquals(contentfulProperties.getWorkshopSpaceEnvironment(), o.get("environmentId"));
                     assertTrue(((String) o.get("id")).length() > 0);
                 });
     }
@@ -235,11 +252,11 @@ public class ContentfulControllerIT {
         // given
         HttpEntity<String> entity = new HttpEntity(null, headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contentlocale/get/objectKey/");
-        restUrlBuilder.append(contefulProperties.getWorkshopSpaceName());
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append("master");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
 
         // when
         ResponseEntity<String> response = restTemplate.exchange(
@@ -254,7 +271,7 @@ public class ContentfulControllerIT {
                 .map(s -> (Map<String,?>) s)
                 .forEach( o -> {
                     assertEquals(productCatalogueSpaceId, o.get("spaceId"));
-                    assertEquals("master", o.get("environmentId"));
+                    assertEquals(contentfulProperties.getWorkshopSpaceEnvironment(), o.get("environmentId"));
                     assertTrue(((String) o.get("id")).length() > 0);
                     assertTrue(((String) o.get("name")).length() > 0);
                 });
@@ -270,9 +287,9 @@ public class ContentfulControllerIT {
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/delete/objectKey/");
         restUrlBuilder.append(spaceName);
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append("master");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
         ResponseEntity<String> response = restTemplate.exchange(
                 createURLWithPort(restUrlBuilder.toString()),
                 HttpMethod.DELETE, entity, String.class);
@@ -281,14 +298,14 @@ public class ContentfulControllerIT {
 
     private void createContentfulSpace(String spaceName) {
         MultiValueMap<String, String> map = new LinkedMultiValueMap();
-        map.add("organisation", contefulProperties.getWorkshopOrganisationName());
+        map.add("organisation", contentfulProperties.getWorkshopOrganisationName());
         HttpEntity<Object> entity = new HttpEntity(map, headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/create/objectKey/");
         restUrlBuilder.append(spaceName);
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contefulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append("master");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
         ResponseEntity<String> response = restTemplate.exchange(
                 createURLWithPort(restUrlBuilder.toString()),
                 HttpMethod.POST, entity, String.class);

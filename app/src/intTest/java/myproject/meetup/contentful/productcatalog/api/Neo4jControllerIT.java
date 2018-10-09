@@ -35,15 +35,6 @@ public class Neo4jControllerIT {
 
     private static final Logger logger = LoggerFactory.getLogger(Neo4jControllerIT.class);
 
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-
     @Test
     public void shouldDeleteAllEntities() {
         // given
@@ -59,6 +50,8 @@ public class Neo4jControllerIT {
         // verify
         JSONAssert.assertEquals(expected, response.getBody(), false);
     }
+
+
 
 
     private String createURLWithPort(String uri) {

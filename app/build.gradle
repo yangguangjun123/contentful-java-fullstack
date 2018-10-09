@@ -28,6 +28,11 @@ dependencies {
     }
 }
 
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked"
+    }
+}
 
 springBoot {
     mainClassName = 'myproject.meetup.contentful.productcatalog.Main'
