@@ -1,20 +1,12 @@
 apply plugin: 'application'
 mainClassName = 'myproject.meetup.contentful.productcatalog.Main'
 
-group 'myproject.meetup'
-version '1.0-SNAPSHOT'
-
-sourceCompatibility = JavaVersion.VERSION_1_10
-targetCompatibility = JavaVersion.VERSION_1_10
-
-jar {
-    manifest {
-        attributes('provider': 'gradle', 'Main-Class': 'myproject.meetup.contentful.productcatalog.Main')
-    }
+bootJar {
+    enabled = true
 }
 
-repositories {
-    mavenCentral()
+jar {
+    enabled = true
 }
 
 dependencies {
@@ -23,9 +15,6 @@ dependencies {
     compile 'com.contentful.java:cma-sdk:3.1.0'
     compile group: 'org.json', name: 'json', version: '20180813'
     compile group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: '1.6.3'
-    testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springBootVersion}") {
-        exclude group: "com.vaadin.external.google", module:"android-json"
-    }
 }
 
 gradle.projectsEvaluated {
@@ -36,7 +25,6 @@ gradle.projectsEvaluated {
 
 springBoot {
     mainClassName = 'myproject.meetup.contentful.productcatalog.Main'
-//    executable = true
 }
 
 build.dependsOn(installDist)
@@ -70,4 +58,3 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTest
-

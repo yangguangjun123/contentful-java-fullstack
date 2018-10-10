@@ -9,8 +9,10 @@ import myproject.meetup.contentful.productcatalog.service.Neo4jService;
 import myproject.meetup.contentful.productcatalog.web.ProductWebController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -26,7 +28,10 @@ public class SmokeTest {
     @Autowired
     private ContentfulProperties contentfulProperties;
 
-    @Autowired
+    @MockBean
+    private Neo4jService neo4jService;
+
+    @InjectMocks
     private Neo4jController neo4jController;
 
     @Test

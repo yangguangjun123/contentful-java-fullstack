@@ -39,7 +39,7 @@ public class Neo4jControllerIT {
     public void shouldDeleteAllEntities() {
         // given
         logger.info("shouldDeleteAllEntities");
-        HttpEntity<String> entity = new HttpEntity(null, headers);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
         String expected = String.format("{result: success}");
 
         // when

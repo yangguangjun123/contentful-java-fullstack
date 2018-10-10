@@ -51,7 +51,7 @@ public class ContentfulControllerIT {
     @Before
     public void setUp() {
         if(Objects.isNull(productCatalogueSpaceId)) {
-            HttpEntity<String> entity = new HttpEntity(null, headers);
+            HttpEntity<String> entity = new HttpEntity<>("", headers);
             StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/get/objectKey/");
             restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
             restUrlBuilder.append("/");
@@ -74,7 +74,7 @@ public class ContentfulControllerIT {
     public void shouldReturnContentfulSpaceByName() throws JSONException {
         // given
         logger.info("shouldReturnContentfulSpaceByName");
-        HttpEntity<String> entity = new HttpEntity(null, headers);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/get/objectKey/");
         restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
         restUrlBuilder.append("/");
@@ -99,7 +99,7 @@ public class ContentfulControllerIT {
         // given
         logger.info("shouldDeleteContentfulSpaceByName");
         createContentfulSpace("Copy of Product Catalogue");
-        HttpEntity<String> entity = new HttpEntity(null, headers);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
         String expected = "{result:success}";
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/delete/objectKey/");
         restUrlBuilder.append("Copy of Product Catalogue");
@@ -120,7 +120,7 @@ public class ContentfulControllerIT {
     @Test
     public void shouldUpdateContentfulSpaceCach() {
         // given
-        HttpEntity<String> entity = new HttpEntity(null, headers);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
         String expected = "{result:success}";
 
         // when
@@ -136,9 +136,9 @@ public class ContentfulControllerIT {
     public void shouldCreateContentfulSpaceForGivenNameAndOrganisation() {
         logger.info("shouldCreateContentfulSpaceForGivenNameAndOrganisation");
         deleteContentfulSpace("Copy of Product Catalogue");
-        MultiValueMap<String, String> map = new LinkedMultiValueMap();
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("organisation", contentfulProperties.getWorkshopOrganisationName());
-        HttpEntity<Object> entity = new HttpEntity(map, headers);
+        HttpEntity<Object> entity = new HttpEntity<>(map, headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/create/objectKey/");
         restUrlBuilder.append("Copy of Product Catalogue");
         restUrlBuilder.append("/");
@@ -159,10 +159,11 @@ public class ContentfulControllerIT {
         deleteContentfulSpace("Copy of Product Catalogue");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldRetrieveAllContentTypesBySpaceName() {
         // given
-        HttpEntity<String> entity = new HttpEntity(null, headers);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contenttype/get/objectKey/");
         restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
         restUrlBuilder.append("/");
@@ -189,10 +190,11 @@ public class ContentfulControllerIT {
                     });
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldRetrieveAllContentEntriesBySpaceName() {
         // given
-        HttpEntity<String> entity = new HttpEntity(null, headers);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contententry/get/objectKey/");
         restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
         restUrlBuilder.append("/");
@@ -218,10 +220,11 @@ public class ContentfulControllerIT {
                 });
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldRetrieveAllContentAssets() {
         // given
-        HttpEntity<String> entity = new HttpEntity(null, headers);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contentasset/get/objectKey/");
         restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
         restUrlBuilder.append("/");
@@ -247,10 +250,11 @@ public class ContentfulControllerIT {
                 });
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void shouldRetrieveAllContentLocalesBySpaceName() {
         // given
-        HttpEntity<String> entity = new HttpEntity(null, headers);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contentlocale/get/objectKey/");
         restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
         restUrlBuilder.append("/");
@@ -283,7 +287,7 @@ public class ContentfulControllerIT {
 
     private void deleteContentfulSpace(String spaceName) {
         logger.info("deleteContentfulData");
-        HttpEntity<String> entity = new HttpEntity(null, headers);
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/delete/objectKey/");
         restUrlBuilder.append(spaceName);
         restUrlBuilder.append("/");
@@ -297,9 +301,9 @@ public class ContentfulControllerIT {
     }
 
     private void createContentfulSpace(String spaceName) {
-        MultiValueMap<String, String> map = new LinkedMultiValueMap();
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("organisation", contentfulProperties.getWorkshopOrganisationName());
-        HttpEntity<Object> entity = new HttpEntity(map, headers);
+        HttpEntity<Object> entity = new HttpEntity<>(map, headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/space/create/objectKey/");
         restUrlBuilder.append(spaceName);
         restUrlBuilder.append("/");

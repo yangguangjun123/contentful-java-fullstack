@@ -1,32 +1,64 @@
 buildscript {
-    repositories { mavenCentral() }
-}
-
-buildscript {
-    ext { springBootVersion = '2.0.5.RELEASE' }
-
+    ext {
+        springBootVersion = '2.0.5.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
     }
 }
 
-
-//plugins { id "io.spring.dependency-management" version "1.0.4.RELEASE" }
-//apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
-
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-
-apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 
-repositories {
-    mavenCentral()
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    group = 'myproject.meetup'
+    version = '1.0-SNAPSHOT'
+
+    sourceCompatibility = JavaVersion.VERSION_1_10
+    targetCompatibility = JavaVersion.VERSION_1_10
+
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
+
+    dependencies {
+        testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springBootVersion}") {
+            exclude group: "com.vaadin.external.google", module: "android-json"
+        }
+    }
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_10
-targetCompatibility = JavaVersion.VERSION_1_10
+dependencies {
+    compile project(':app')
+}
+
+jar {
+    baseName = 'contentful-workshop-jar'
+    version = '1.0-SNAPSHOT'
+}
+
+springBoot {
+    mainClassName = 'myproject.meetup.contentful.productcatalog.Main'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = false
+}
 
 wrapper {
     gradleVersion = '4.8'
