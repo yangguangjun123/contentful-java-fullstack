@@ -1,32 +1,60 @@
 apply plugin: 'application'
-mainClassName = 'myproject.meetup.contentful.fullstack.Main'
+mainClassName = 'myproject.meetup.contentful.productcatalog.Main'
 
-group 'myproject.meetup.meetup'
-version '1.0-SNAPSHOT'
-
-sourceCompatibility = 1.8
-
-jar {
-    manifest {
-        attributes('provider': 'gradle', 'Main-Class': 'myproject.meetup.contentful.fullstack.Main')
-    }
+bootJar {
+    enabled = true
 }
 
-repositories {
-    mavenCentral()
+jar {
+    enabled = true
 }
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter-web:1.4.2.RELEASE")
-    compile("com.contentful.java:java-sdk:7.2.0")
-//    compile("com.github.mjeanroy:springmvc-mustache:0.5.3")
-//    compile("com.github.spullara.mustache.java:compiler:0.9.4")
-    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.0'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: "${springBootVersion}"
+    compile 'com.contentful.java:java-sdk:10.0.0'
+    compile 'com.contentful.java:cma-sdk:3.1.0'
+    compile group: 'org.json', name: 'json', version: '20180813'
+    compile group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: '1.6.3'
+}
+
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked"
+    }
 }
 
 springBoot {
-    mainClass = mainClassName
+    mainClassName = 'myproject.meetup.contentful.productcatalog.Main'
 }
 
 build.dependsOn(installDist)
+
+// setup separate integration tests
+sourceSets {
+    integrationTest {
+        java.srcDir file('src/intTest/java')
+        resources.srcDir file('src/intTest/resources')
+        compileClasspath += sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+}
+
+task integrationTest(type: Test) {
+    description = 'Runs integration tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    mustRunAfter test
+}
+
+check.dependsOn integrationTest
