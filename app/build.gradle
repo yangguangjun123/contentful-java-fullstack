@@ -36,13 +36,14 @@ gradle.projectsEvaluated {
 
 springBoot {
     mainClassName = 'myproject.meetup.contentful.productcatalog.Main'
+//    executable = true
 }
 
 build.dependsOn(installDist)
 
 // setup separate integration tests
 sourceSets {
-    intTest {
+    integrationTest {
         java.srcDir file('src/intTest/java')
         resources.srcDir file('src/intTest/resources')
         compileClasspath += sourceSets.main.output + configurations.testRuntime
@@ -51,20 +52,20 @@ sourceSets {
 }
 
 configurations {
-//    intTestImplementation.extendsFrom implementation
-    intTestImplementation.extendsFrom testImplementation
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
 }
 
-//dependencies {
-//    intTestImplementation 'junit:junit:4.12'
-//}
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+}
 
 task integrationTest(type: Test) {
     description = 'Runs integration tests.'
     group = 'verification'
 
-    testClassesDirs = sourceSets.intTest.output.classesDirs
-    classpath = sourceSets.intTest.runtimeClasspath
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
     mustRunAfter test
 }
 
