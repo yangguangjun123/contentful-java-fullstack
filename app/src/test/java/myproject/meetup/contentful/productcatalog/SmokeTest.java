@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import myproject.meetup.contentful.productcatalog.api.ContentfulController;
 import myproject.meetup.contentful.productcatalog.api.Neo4jController;
 import myproject.meetup.contentful.productcatalog.config.ContentfulProperties;
-import myproject.meetup.contentful.productcatalog.service.Neo4jService;
+import myproject.meetup.contentful.productcatalog.service.Neo4jContentfulService;
 import myproject.meetup.contentful.productcatalog.web.ProductWebController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +29,7 @@ public class SmokeTest {
     private ContentfulProperties contentfulProperties;
 
     @MockBean
-    private Neo4jService neo4jService;
+    private Neo4jContentfulService neo4jService;
 
     @InjectMocks
     private Neo4jController neo4jController;
