@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static org.neo4j.driver.v1.Values.parameters;
@@ -67,7 +68,7 @@ public class Neo4jContentfulService {
                           .forEach(this::processContentfulJSONMap);
     }
 
-    private void processContentfulJSONMap(HashMap<String, Object> contentfulMap) {
+    private void processContentfulJSONMap(Map<String, Object> contentfulMap) {
         // process system map
         contentfulMap.entrySet()
                      .stream()
@@ -77,9 +78,22 @@ public class Neo4jContentfulService {
                      .forEach(this::processContentfulJSONSystemMap);
 
         // process fields map
+        JSONObject contentfulJson = new JSONObject(contentfulMap);
+        processContentfulJSONFieldsMap(contentfulJson.getString("id"), contentfulJson.getJSONObject("fields"));
+
     }
 
-    private void processContentfulJSONSystemMap(HashMap<String, Object> systemMap) {
+    private void processContentfulJSONFieldsMap(String id, JSONObject fieldsJson) {
+        logger.info("field json: " + fieldsJson);
+
+        // process fields containing sys key
+
+
+        // process other fields (concatnation of keys)
+
+    }
+
+    private void processContentfulJSONSystemMap(Map<String, Object> systemMap) {
         JSONObject systemJSON = new JSONObject(systemMap);
         JSONObject spaceJson = systemJSON.getJSONObject("space");
         String spaceId = spaceJson.getString("id");
