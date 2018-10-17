@@ -1,5 +1,7 @@
 package myproject.meetup.contentful.productcatalog.api;
 
+import myproject.meetup.contentful.productcatalog.config.ContentfulProperties;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -29,6 +31,9 @@ public class Neo4jControllerIT {
     private int port;
 
     @Autowired
+    private ContentfulProperties contentfulProperties;
+
+    @Autowired
     private TestRestTemplate restTemplate;
 
     private HttpHeaders headers = new HttpHeaders();
@@ -44,15 +49,38 @@ public class Neo4jControllerIT {
 
         // when
         ResponseEntity<String> response = restTemplate.exchange(
-                createURLWithPort("/neo4j/deleteAll"),
+                createURLWithPort("/neo4j/delete/all"),
                 HttpMethod.DELETE, entity, String.class);
 
         // verify
         JSONAssert.assertEquals(expected, response.getBody(), false);
     }
 
+    @Test
+    public void shouldCreateNeo4jNodeFromContentfulEntry() {
+        // given
+        HttpEntity<String> entity = new HttpEntity<>("", headers);
+        StringBuilder restUrlBuilder = new StringBuilder("/contentful/contententry/get/objectKey/");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
+        restUrlBuilder.append("/");
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append("/");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
+        ResponseEntity<String> response = restTemplate.exchange(
+                createURLWithPort(restUrlBuilder.toString()),
+                HttpMethod.GET, entity, String.class);
+        JSONObject obj = new JSONObject(response.getBody());
+        JSONArray arr = obj.getJSONArray("contentEntry");
 
+        // when
+        String expected = "{result:success}";
+        HttpEntity<String> entityForNeo4j = new HttpEntity<String>(JSONObject.valueToString(arr), headers);
+        response = restTemplate.exchange(createURLWithPort("/neo4j/create/node/label/Entry"),
+                HttpMethod.POST, entityForNeo4j, String.class);
 
+        // verify
+        JSONAssert.assertEquals(expected, response.getBody(), false);
+    }
 
     private String createURLWithPort(String uri) {
         return "http://localhost:" + port + uri;

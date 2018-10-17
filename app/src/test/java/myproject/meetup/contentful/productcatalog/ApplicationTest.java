@@ -1,6 +1,6 @@
 package myproject.meetup.contentful.productcatalog;
 
-import myproject.meetup.contentful.productcatalog.service.Neo4jService;
+import myproject.meetup.contentful.productcatalog.service.Neo4jContentfulService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class ApplicationTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private Neo4jService neo4jService;
+    private Neo4jContentfulService neo4jService;
 
     @Test
     public void shouldLoadApplicationContext() throws Exception {
