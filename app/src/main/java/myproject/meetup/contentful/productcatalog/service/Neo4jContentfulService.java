@@ -1,5 +1,6 @@
 package myproject.meetup.contentful.productcatalog.service;
 
+import com.jayway.jsonpath.JsonPath;
 import myproject.meetup.contentful.productcatalog.config.Neo4jProperties;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static org.neo4j.driver.v1.Values.parameters;
 
@@ -75,25 +77,94 @@ public class Neo4jContentfulService {
                      .filter(entry -> entry.getKey().equals("system"))
                      .map(entry -> entry.getValue())
                      .map(HashMap.class::cast)
-                     .forEach(this::processContentfulJSONSystemMap);
+                     .forEach(this::processContentfulSystemMap);
+
+        String type = ((Map<String, Object>) contentfulMap.get("system")).get("type").toString();
 
         // process fields map
-        JSONObject contentfulJson = new JSONObject(contentfulMap);
-        processContentfulJSONFieldsMap(contentfulJson.getString("id"), contentfulJson.getJSONObject("fields"));
+        processContentfulFieldsMap((String) contentfulMap.get("id"), type,
+                (Map<String, Object> ) contentfulMap.get("fields"));
 
     }
 
-    private void processContentfulJSONFieldsMap(String id, JSONObject fieldsJson) {
-        logger.info("field json: " + fieldsJson);
-
+    private void processContentfulFieldsMap(String id, String type, Map<String, Object> fieldsMap) {
         // process fields containing sys key
+        fieldsMap.entrySet()
+                .stream()
+                .filter(this::isSysField)
+                .forEach(entry -> processSysField(id, type, entry));
 
-
-        // process other fields (concatnation of keys)
-
+        // process non-sys fields
+        fieldsMap.entrySet()
+                .stream()
+                .filter(this::isNonSysField)
+                .forEach(entry -> processNonSysField(id, type, entry));
     }
 
-    private void processContentfulJSONSystemMap(Map<String, Object> systemMap) {
+    private void processSysField(String id, String type, Map.Entry<String, Object> entry) {
+        logger.info(String.format("id: %s, type: %s, entry key: %s, entry value: %s", id, type,
+                entry.getKey(), entry.getValue().toString()));
+        JSONObject entryJson = new JSONObject();
+        entryJson.put(entry.getKey(), entry.getValue());
+        JSONArray array = new JSONArray(JsonPath.parse(entryJson.toString()).read("$..[?(@.sys)]").toString());
+        String linkType = array.getJSONObject(0).query("/sys/linkType").toString();
+        String relationshipType = array.getJSONObject(0).query("/sys/type").toString();
+        String linkedId = array.getJSONObject(0).query("/sys/id").toString();
+
+        String createdRelationship = ("MATCH(n:#type# { id : {id} }) " +
+                "MATCH(m:#linkType# { linkedId : {linkedId} }) " +
+                "CREATE (n)-[:#relationshipType# { linkType: {linkType} }]->(m)");
+        try( Session session = driver.session()) {
+            session.run(createdRelationship.replace("#type#", type).replace("#linkType#", linkType),
+                    parameters( "id", id, "linkedId", linkedId, "linkType", linkType));
+        }
+
+        logger.info(array.toString());
+    }
+
+    public String getKeyPath(Map<String, Object> map) {
+        Set<Map.Entry<String, Object>> entrySet =  map.entrySet();
+        Map.Entry<String, Object>  entry = entrySet.iterator().next();
+        if(!(entry.getValue() instanceof Map)) {
+            return entry.getKey();
+        }
+        return entry.getKey() + "_" + getKeyPath((Map<String, Object>) entry.getValue());
+    }
+
+    public Object getValueOfNestedMap(Map<String, Object> map) {
+        Set<Map.Entry<String, Object>> entrySet =  map.entrySet();
+        Map.Entry<String, Object>  entry = entrySet.iterator().next();
+        if(!(entry.getValue() instanceof Map)) {
+            return entry.getValue();
+        }
+        return getValueOfNestedMap((Map<String, Object>) entry.getValue());
+    }
+
+    private void processNonSysField(String id, String type, Map.Entry<String, Object> entry) {
+        Map<String, Object> entryMap = new HashMap<>();
+        entryMap.put(entry.getKey(), entry.getValue());
+        String updateNode = ("MERGE (n:#label# { id : {id} }) SET n.#propertyName# = $value");
+        try( Session session = driver.session()) {
+            session.run(updateNode.replace("#label#", type).replace("#propertyName#", getKeyPath(entryMap)),
+                    parameters( "id", id, "value", getValueOfNestedMap(entryMap) ));
+        }
+    }
+
+    private boolean isNonSysField(Map.Entry<String, Object> stringObjectEntry) {
+        JSONObject json = new JSONObject();
+        json.append(stringObjectEntry.getKey(), stringObjectEntry.getValue());
+        JSONArray found = new JSONArray(JsonPath.parse(json.toString()).read("$..[?(@.sys)]").toString());
+        return found.isEmpty();
+    }
+
+    private boolean isSysField(Map.Entry<String, Object> stringObjectEntry) {
+        JSONObject json = new JSONObject();
+        json.append(stringObjectEntry.getKey(), stringObjectEntry.getValue());
+        JSONArray found = new JSONArray(JsonPath.parse(json.toString()).read("$..[?(@.sys)]").toString());
+        return !found.isEmpty();
+    }
+
+    private void processContentfulSystemMap(Map<String, Object> systemMap) {
         JSONObject systemJSON = new JSONObject(systemMap);
         JSONObject spaceJson = systemJSON.getJSONObject("space");
         String spaceId = spaceJson.getString("id");
