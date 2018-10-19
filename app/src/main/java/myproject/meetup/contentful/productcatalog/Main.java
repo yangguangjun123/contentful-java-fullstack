@@ -12,11 +12,11 @@ public class Main {
 
     public static void main(String[] args) {
 
-        logger.info("Starting Contentful Java Fullstack Application ...");
+        logger.info("Starting Contentful-to-Neo4j  Application ...");
 
         SpringApplication.run(Main.class, args);
 
-        logger.info("Staring Contentful Java Fullstack Application Completes ...");
+        logger.info("Staring Contentful-to-Neo4j Application Completes ...");
 
     }
 }
