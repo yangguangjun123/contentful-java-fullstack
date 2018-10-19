@@ -15,6 +15,10 @@ dependencies {
     compile 'com.contentful.java:cma-sdk:3.1.0'
     compile group: 'org.json', name: 'json', version: '20180813'
     compile group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: '1.6.3'
+    compile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
+    testCompile 'org.awaitility:awaitility:3.1.2'
+    testCompile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
+
 }
 
 gradle.projectsEvaluated {
