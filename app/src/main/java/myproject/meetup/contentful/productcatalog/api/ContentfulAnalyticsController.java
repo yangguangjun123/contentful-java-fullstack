@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/contentful")
+@RequestMapping(value = "/contentful", produces={"application/json","application/xml"})
 public class ContentfulAnalyticsController {
 
     private ContentfulNeo4jService neo4jContentfulService;

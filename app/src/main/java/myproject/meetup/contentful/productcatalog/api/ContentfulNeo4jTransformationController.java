@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/contentful/neo4j/transform")
+@RequestMapping(value = "/contentful/neo4j/transform", produces={"application/json","application/xml"})
 public class ContentfulNeo4jTransformationController {
 
     private ContentfulService contentfulSpaceService;
