@@ -1,9 +1,30 @@
 package myproject.meetup.contentful.productcatalog.service;
 
-import java.util.List;
+import com.contentful.java.cma.model.CMAArray;
+import com.contentful.java.cma.model.CMAEntry;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ContentfulNeo4jTransformationService {
-    public List<String> transformAssets(String assetJson) {
-        return null;
+
+    private ContentfulService contentfulSpaceService;
+    private ContentfulNeo4jService contentfulNeo4jService;
+
+    @Autowired
+    public ContentfulNeo4jTransformationService(ContentfulService contentfulSpaceService,
+                                                   ContentfulNeo4jService contentfulNeo4jService) {
+        this.contentfulSpaceService = contentfulSpaceService;
+        this.contentfulNeo4jService = contentfulNeo4jService;
+    }
+
+    public String transform(String spaceName, String accessToken, String  environment) {
+        contentfulNeo4jService.deleteAll();
+        CMAArray<CMAEntry> entries = contentfulSpaceService.getAllContentfulEntries(spaceName,
+                accessToken, environment);
+        JSONObject obj = new JSONObject(entries);
+        contentfulNeo4jService.createEntryNode(obj.getJSONArray("items").toString());
+        return "{result:success}";
     }
 }
