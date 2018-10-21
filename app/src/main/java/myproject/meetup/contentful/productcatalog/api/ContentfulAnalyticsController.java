@@ -1,6 +1,6 @@
 package myproject.meetup.contentful.productcatalog.api;
 
-import myproject.meetup.contentful.productcatalog.service.Neo4jContentfulService;
+import myproject.meetup.contentful.productcatalog.service.ContentfulNeo4jService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,16 +8,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/contentful")
 public class ContentfulAnalyticsController {
 
-    private Neo4jContentfulService neo4jContentfulService;
+    private ContentfulNeo4jService neo4jContentfulService;
 
     @Autowired
-    public ContentfulAnalyticsController(Neo4jContentfulService neo4jContentfulService) {
+    public ContentfulAnalyticsController(ContentfulNeo4jService neo4jContentfulService) {
         this.neo4jContentfulService = neo4jContentfulService;
     }
 

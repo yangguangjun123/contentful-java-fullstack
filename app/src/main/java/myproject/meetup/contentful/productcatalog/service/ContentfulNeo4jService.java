@@ -21,7 +21,6 @@ import javax.annotation.PreDestroy;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,15 +30,15 @@ import java.util.Set;
 import static org.neo4j.driver.v1.Values.parameters;
 
 @Service
-public class Neo4jContentfulService {
+public class ContentfulNeo4jService {
 
     private Neo4jProperties neo4jProperties;
     private Driver driver;
 
-    private static final Logger logger = LoggerFactory.getLogger(Neo4jContentfulService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ContentfulNeo4jService.class);
 
     @Autowired
-    public Neo4jContentfulService(Neo4jProperties neo4jProperties) {
+    public ContentfulNeo4jService(Neo4jProperties neo4jProperties) {
         this.neo4jProperties = neo4jProperties;
     }
 
