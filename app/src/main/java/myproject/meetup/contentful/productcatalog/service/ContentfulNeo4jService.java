@@ -1,5 +1,6 @@
 package myproject.meetup.contentful.productcatalog.service;
 
+import com.google.gson.Gson;
 import com.jayway.jsonpath.JsonPath;
 import myproject.meetup.contentful.productcatalog.config.Neo4jProperties;
 import org.json.JSONArray;
@@ -7,7 +8,9 @@ import org.json.JSONObject;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.StatementResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +30,15 @@ import java.util.Set;
 import static org.neo4j.driver.v1.Values.parameters;
 
 @Service
-public class Neo4jContentfulService {
+public class ContentfulNeo4jService {
 
     private Neo4jProperties neo4jProperties;
     private Driver driver;
 
-    private static final Logger logger = LoggerFactory.getLogger(Neo4jContentfulService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ContentfulNeo4jService.class);
 
     @Autowired
-    public Neo4jContentfulService(Neo4jProperties neo4jProperties) {
+    public ContentfulNeo4jService(Neo4jProperties neo4jProperties) {
         this.neo4jProperties = neo4jProperties;
     }
 
@@ -56,6 +59,7 @@ public class Neo4jContentfulService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void createEntryNode(String jsonEntryArrayString) {
         logger.info("receive entry json: " + jsonEntryArrayString);
         JSONArray jsonArray = new JSONArray(jsonEntryArrayString);
@@ -69,6 +73,7 @@ public class Neo4jContentfulService {
                           .forEach(this::processContentfulJSONMap);
     }
 
+    @SuppressWarnings("unchecked")
     private void processContentfulJSONMap(Map<String, Object> contentfulMap) {
         // process system map
         contentfulMap.entrySet()
@@ -78,6 +83,7 @@ public class Neo4jContentfulService {
                      .map(HashMap.class::cast)
                      .forEach(this::processContentfulSystemMap);
 
+        @SuppressWarnings("unchecked")
         String type = ((Map<String, Object>) contentfulMap.get("system")).get("type").toString();
 
         // process fields map
@@ -161,6 +167,7 @@ public class Neo4jContentfulService {
                       });
     }
 
+    @SuppressWarnings("unchecked")
     public String getKeyPath(Map<String, Object> map) {
         Set<Map.Entry<String, Object>> entrySet =  map.entrySet();
         Map.Entry<String, Object>  entry = entrySet.iterator().next();
@@ -170,6 +177,7 @@ public class Neo4jContentfulService {
         return entry.getKey() + "_" + getKeyPath((Map<String, Object>) entry.getValue());
     }
 
+    @SuppressWarnings("unchecked")
     public Object getValueOfNestedMap(Map<String, Object> map) {
         Set<Map.Entry<String, Object>> entrySet =  map.entrySet();
         Map.Entry<String, Object>  entry = entrySet.iterator().next();
@@ -343,5 +351,19 @@ public class Neo4jContentfulService {
                             "publishedByLinkType", publishedByLinkType));
         }
 
+    }
+
+    public JSONArray getOrphanNodes() {
+        JSONArray jsonArray = new JSONArray();
+        Gson gson = new Gson();
+        String cypherStatement = "MATCH (a) WHERE NOT (a)-[]-() RETURN a";
+        try( Session session = driver.session()) {
+            StatementResult result = session.run("MATCH (a) WHERE NOT (a)-[]-() RETURN a");
+            while ( result.hasNext() ) {
+                Record record = result.next();
+                jsonArray.put(gson.toJson(record.asMap()));
+            }
+        }
+        return jsonArray;
     }
 }

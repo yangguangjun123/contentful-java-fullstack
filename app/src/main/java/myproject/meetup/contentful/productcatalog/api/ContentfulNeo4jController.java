@@ -1,6 +1,6 @@
 package myproject.meetup.contentful.productcatalog.api;
 
-import myproject.meetup.contentful.productcatalog.service.Neo4jContentfulService;
+import myproject.meetup.contentful.productcatalog.service.ContentfulNeo4jService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/neo4j")
-public class Neo4jController {
+@RequestMapping("/contentful/neo4j")
+public class ContentfulNeo4jController {
 
-    private Neo4jContentfulService neo4jContentfulService;
+    private ContentfulNeo4jService neo4jContentfulService;
 
     @Autowired
-    public Neo4jController(Neo4jContentfulService neo4jService) {
+    public ContentfulNeo4jController(ContentfulNeo4jService neo4jService) {
         this.neo4jContentfulService = neo4jService;
     }
 

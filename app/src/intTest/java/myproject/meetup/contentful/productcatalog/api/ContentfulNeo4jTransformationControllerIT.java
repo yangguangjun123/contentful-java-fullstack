@@ -23,20 +23,23 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class Neo4jControllerIT {
+public class ContentfulNeo4jTransformationControllerIT {
 
     @LocalServerPort
     private int port;
 
     @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Autowired
     private ContentfulProperties contentfulProperties;
+
+    private HttpHeaders headers = new HttpHeaders();
 
     @Autowired
     private TestRestTemplate testRestTemplate;
 
-    private HttpHeaders headers = new HttpHeaders();
-
-    private static final Logger logger = LoggerFactory.getLogger(Neo4jControllerIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(ContentfulNeo4jTransformationControllerIT.class);
 
     @Before
     public void setUp() {
@@ -44,8 +47,6 @@ public class Neo4jControllerIT {
         // set the read timeot, this value is in miliseconds
         clientRequestFactory.setReadTimeout(60000);
         testRestTemplate.getRestTemplate().setRequestFactory(clientRequestFactory);
-
-        setupTestData();
     }
 
     @After
@@ -54,56 +55,43 @@ public class Neo4jControllerIT {
     }
 
     @Test
-    public void shouldDeleteAllEntities() {
+    public void shouldTransformContentfulModelToNeo4j() {
         // given
-        logger.info("shouldDeleteAllEntities");
         HttpEntity<String> entity = new HttpEntity<>("", headers);
-        String expected = String.format("{result: success}");
+        testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/delete/all"),
+                HttpMethod.DELETE, entity, String.class);
+        StringBuilder restUrlBuilder = new StringBuilder("/contentful/neo4j/transform/");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
+        restUrlBuilder.append("/");
+        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append("/");
+        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
+        String expected = "{result:success}";
 
         // when
-        ResponseEntity<String> response = testRestTemplate.exchange(
-                createURLWithPort("/contentful/neo4j/delete/all"),
-                HttpMethod.DELETE, entity, String.class);
+        ResponseEntity<String> response = testRestTemplate.exchange(createURLWithPort(restUrlBuilder.toString()),
+                HttpMethod.POST, entity, String.class);
 
         // verify
         JSONAssert.assertEquals(expected, response.getBody(), false);
     }
 
     @Test
-    public void shouldCreateNeo4jNodeFromContentfulEntry() {
+    public void shouldTransformContententfulModelToNeo4jWithoutPassingParameters(){
         // given
-        testRestTemplate.exchange(
-                createURLWithPort("/contentful/neo4j/delete/all"),
-                HttpMethod.DELETE, new HttpEntity<>("", headers), String.class);
         HttpEntity<String> entity = new HttpEntity<>("", headers);
-        StringBuilder restUrlBuilder = new StringBuilder("/contentful/contententry/get/objectKey/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
-        restUrlBuilder.append("/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
-        restUrlBuilder.append("/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
-        ResponseEntity<String> response = testRestTemplate.exchange(
-                createURLWithPort(restUrlBuilder.toString()),
-                HttpMethod.GET, entity, String.class);
-        JSONObject obj = new JSONObject(response.getBody());
-        JSONArray arr = obj.getJSONArray("contentEntry");
+        testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/delete/all"),
+                HttpMethod.DELETE, entity, String.class);
+        StringBuilder restUrlBuilder = new StringBuilder("/contentful/neo4j/transform/default");
+        String expected = "{result:success}";
 
         // when
-//        Awaitility.await().pollDelay(Duration.ONE_SECOND).until(() -> true);
-//        Thread.sleep(1000);
-        String expected = "{result:success}";
-        HttpEntity<String> entityForNeo4j = new HttpEntity<String>(JSONObject.valueToString(arr), headers);
-        response = testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/create/node/label/Entry"),
-                HttpMethod.POST, entityForNeo4j, String.class);
+        ResponseEntity<String> response = testRestTemplate.exchange(createURLWithPort(restUrlBuilder.toString()),
+                HttpMethod.POST, entity, String.class);
 
         // verify
         JSONAssert.assertEquals(expected, response.getBody(), false);
     }
-
-    private String createURLWithPort(String uri) {
-        return "http://localhost:" + port + uri;
-    }
-
 
     private void setupTestData() {
         HttpEntity<String> entity = new HttpEntity<>("", headers);
@@ -124,4 +112,9 @@ public class Neo4jControllerIT {
         testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/create/node/label/Entry"),
                 HttpMethod.POST, entityForNeo4j, String.class);
     }
+
+    private String createURLWithPort(String uri) {
+        return "http://localhost:" + port + uri;
+    }
+
 }

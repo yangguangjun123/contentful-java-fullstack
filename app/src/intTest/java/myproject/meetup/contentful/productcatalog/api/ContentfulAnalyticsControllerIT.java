@@ -4,6 +4,7 @@ import myproject.meetup.contentful.productcatalog.config.ContentfulProperties;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class Neo4jControllerIT {
+public class ContentfulAnalyticsControllerIT {
 
     @LocalServerPort
     private int port;
@@ -45,65 +46,30 @@ public class Neo4jControllerIT {
         clientRequestFactory.setReadTimeout(60000);
         testRestTemplate.getRestTemplate().setRequestFactory(clientRequestFactory);
 
-        setupTestData();
+        this.setupTestData();
     }
 
     @After
     public void tearDown() {
-        setupTestData();
     }
 
     @Test
-    public void shouldDeleteAllEntities() {
+    public void shouldReturnOrphanContentfulRecords() {
         // given
-        logger.info("shouldDeleteAllEntities");
         HttpEntity<String> entity = new HttpEntity<>("", headers);
-        String expected = String.format("{result: success}");
 
         // when
-        ResponseEntity<String> response = testRestTemplate.exchange(
-                createURLWithPort("/contentful/neo4j/delete/all"),
-                HttpMethod.DELETE, entity, String.class);
+        ResponseEntity<String> response = testRestTemplate.exchange(createURLWithPort(
+                "/contentful/analytics/orphan"), HttpMethod.GET, entity, String.class);
 
         // verify
-        JSONAssert.assertEquals(expected, response.getBody(), false);
-    }
-
-    @Test
-    public void shouldCreateNeo4jNodeFromContentfulEntry() {
-        // given
-        testRestTemplate.exchange(
-                createURLWithPort("/contentful/neo4j/delete/all"),
-                HttpMethod.DELETE, new HttpEntity<>("", headers), String.class);
-        HttpEntity<String> entity = new HttpEntity<>("", headers);
-        StringBuilder restUrlBuilder = new StringBuilder("/contentful/contententry/get/objectKey/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
-        restUrlBuilder.append("/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
-        restUrlBuilder.append("/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
-        ResponseEntity<String> response = testRestTemplate.exchange(
-                createURLWithPort(restUrlBuilder.toString()),
-                HttpMethod.GET, entity, String.class);
-        JSONObject obj = new JSONObject(response.getBody());
-        JSONArray arr = obj.getJSONArray("contentEntry");
-
-        // when
-//        Awaitility.await().pollDelay(Duration.ONE_SECOND).until(() -> true);
-//        Thread.sleep(1000);
-        String expected = "{result:success}";
-        HttpEntity<String> entityForNeo4j = new HttpEntity<String>(JSONObject.valueToString(arr), headers);
-        response = testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/create/node/label/Entry"),
-                HttpMethod.POST, entityForNeo4j, String.class);
-
-        // verify
-        JSONAssert.assertEquals(expected, response.getBody(), false);
+        JSONObject json = new JSONObject(response.getBody());
+        Assert.assertTrue(json.getJSONArray("orphans").length() == 1);
     }
 
     private String createURLWithPort(String uri) {
         return "http://localhost:" + port + uri;
     }
-
 
     private void setupTestData() {
         HttpEntity<String> entity = new HttpEntity<>("", headers);
