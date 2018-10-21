@@ -73,7 +73,7 @@ public class ContentfulAnalyticsControllerIT {
 
     private void setupTestData() {
         HttpEntity<String> entity = new HttpEntity<>("", headers);
-        testRestTemplate.exchange(createURLWithPort("/neo4j/delete/all"),
+        testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/delete/all"),
                 HttpMethod.DELETE, entity, String.class);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contententry/get/objectKey/");
         restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
@@ -87,7 +87,7 @@ public class ContentfulAnalyticsControllerIT {
         JSONObject obj = new JSONObject(response.getBody());
         JSONArray arr = obj.getJSONArray("contentEntry");
         HttpEntity<String> entityForNeo4j = new HttpEntity<String>(JSONObject.valueToString(arr), headers);
-        testRestTemplate.exchange(createURLWithPort("/neo4j/create/node/label/Entry"),
+        testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/create/node/label/Entry"),
                 HttpMethod.POST, entityForNeo4j, String.class);
     }
 }

@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/neo4j")
-public class Neo4jController {
+@RequestMapping("/contentful/neo4j")
+public class ContentfulNeo4jController {
 
     private ContentfulNeo4jService neo4jContentfulService;
 
     @Autowired
-    public Neo4jController(ContentfulNeo4jService neo4jService) {
+    public ContentfulNeo4jController(ContentfulNeo4jService neo4jService) {
         this.neo4jContentfulService = neo4jService;
     }
 

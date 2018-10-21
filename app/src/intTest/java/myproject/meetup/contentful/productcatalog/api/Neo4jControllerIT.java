@@ -62,7 +62,7 @@ public class Neo4jControllerIT {
 
         // when
         ResponseEntity<String> response = testRestTemplate.exchange(
-                createURLWithPort("/neo4j/delete/all"),
+                createURLWithPort("/contentful/neo4j/delete/all"),
                 HttpMethod.DELETE, entity, String.class);
 
         // verify
@@ -73,7 +73,7 @@ public class Neo4jControllerIT {
     public void shouldCreateNeo4jNodeFromContentfulEntry() {
         // given
         testRestTemplate.exchange(
-                createURLWithPort("/neo4j/delete/all"),
+                createURLWithPort("/contentful/neo4j/delete/all"),
                 HttpMethod.DELETE, new HttpEntity<>("", headers), String.class);
         HttpEntity<String> entity = new HttpEntity<>("", headers);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contententry/get/objectKey/");
@@ -93,7 +93,7 @@ public class Neo4jControllerIT {
 //        Thread.sleep(1000);
         String expected = "{result:success}";
         HttpEntity<String> entityForNeo4j = new HttpEntity<String>(JSONObject.valueToString(arr), headers);
-        response = testRestTemplate.exchange(createURLWithPort("/neo4j/create/node/label/Entry"),
+        response = testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/create/node/label/Entry"),
                 HttpMethod.POST, entityForNeo4j, String.class);
 
         // verify
@@ -107,7 +107,7 @@ public class Neo4jControllerIT {
 
     private void setupTestData() {
         HttpEntity<String> entity = new HttpEntity<>("", headers);
-        testRestTemplate.exchange(createURLWithPort("/neo4j/delete/all"),
+        testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/delete/all"),
                 HttpMethod.DELETE, entity, String.class);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contententry/get/objectKey/");
         restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
@@ -121,7 +121,7 @@ public class Neo4jControllerIT {
         JSONObject obj = new JSONObject(response.getBody());
         JSONArray arr = obj.getJSONArray("contentEntry");
         HttpEntity<String> entityForNeo4j = new HttpEntity<String>(JSONObject.valueToString(arr), headers);
-        testRestTemplate.exchange(createURLWithPort("/neo4j/create/node/label/Entry"),
+        testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/create/node/label/Entry"),
                 HttpMethod.POST, entityForNeo4j, String.class);
     }
 }

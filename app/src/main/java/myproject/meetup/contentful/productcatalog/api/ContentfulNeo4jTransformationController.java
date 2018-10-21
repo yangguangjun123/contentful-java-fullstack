@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Objects;
 
 @RestController
+@RequestMapping("/contentful/neo4j/transform")
 public class ContentfulNeo4jTransformationController {
 
     private ContentfulService contentfulSpaceService;
@@ -31,8 +32,7 @@ public class ContentfulNeo4jTransformationController {
         this.contentfulNeo4jService = contentfulNeo4jService;
     }
 
-    @RequestMapping(path = "/contentful/neo4j/transform/{spaceName}/{accessToken}/{environment}",
-            method= RequestMethod.POST)
+    @RequestMapping(path = "/{spaceName}/{accessToken}/{environment}", method= RequestMethod.POST)
     public String transform(@PathVariable String spaceName, @PathVariable String accessToken,
                                  @PathVariable String  environment) {
         contentfulNeo4jService.deleteAll();
@@ -43,7 +43,7 @@ public class ContentfulNeo4jTransformationController {
         return "{result:success}";
     }
 
-    @RequestMapping(path = "/contentful/neo4j/transform/default", method= RequestMethod.POST)
+    @RequestMapping(path = "/default", method= RequestMethod.POST)
     public String transform() {
         contentfulNeo4jService.deleteAll();
         CMAArray<CMAEntry> entries = contentfulSpaceService.getAllContentfulEntries(
