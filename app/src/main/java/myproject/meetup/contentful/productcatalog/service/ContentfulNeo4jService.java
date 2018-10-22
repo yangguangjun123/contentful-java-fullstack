@@ -158,7 +158,7 @@ public class ContentfulNeo4jService {
                                   linkType, relationshipType, linkedId));
                           String createdRelationship = ("MERGE(n:#type# { id : {id} }) " +
                                   "MERGE(m:#linkType# { id : {linkedId} }) " +
-                                  "CREATE (n)-[:#relationshipType# { linkType: {linkType} }]->(m)");
+                                  "MERGE (n)-[:#relationshipType# { linkType: {linkType} }]->(m)");
                           try( Session session = driver.session()) {
                               session.run(createdRelationship.replace("#type#", type)
                                               .replace("#linkType#", linkType)
@@ -232,7 +232,7 @@ public class ContentfulNeo4jService {
                     "spacePublished", spacePublished));
         }
 
-        // create content entry/asset/user
+        // create content entry/asset/local/user
         List<String> cypherStatements = new ArrayList<>();
         String type = (String) systemMap.get("type");
         String id = (String) systemMap.get("id");
@@ -240,11 +240,11 @@ public class ContentfulNeo4jService {
         LocalDateTime createdAt = LocalDateTime.parse((String) systemMap.get("createdAt"), formatter);
         LocalDateTime updatedAt = LocalDateTime.parse((String) systemMap.get("updatedAt"), formatter);
         LocalDateTime publishedAt = LocalDateTime.parse((String) systemMap.get("publishedAt"), formatter);
-        String entityNode = ("CREATE (n:#label# { id : {id} }) SET n.createdAt = $createdAt, " +
+        String entityNode = ("MERGE (n:#label# { id : {id} }) SET n.createdAt = $createdAt, " +
                 "n.updatedBy = $updatedAt, " + "n.publishedAt = $publishedAt");
         String spaceTypeRelationship = ("MATCH(n:Space { id : {spaceId} }) " +
                 "MATCH(m:#type# { id : {id} }) " +
-                "CREATE (m)-[:#spaceRelation# { linkType: {spaceLinkType} }]->(n)");
+                "MERGE (m)-[:#spaceRelation# { linkType: {spaceLinkType} }]->(n)");
         try( Session session = driver.session()) {
             session.run(entityNode.replace("#label#", type), parameters( "id", id,
                     "createdAt", createdAt, "updatedAt", updatedAt, "publishedAt", publishedAt ));
@@ -255,7 +255,6 @@ public class ContentfulNeo4jService {
                             "id", id, "spaceLinkType", spaceLinkType));
         }
 
-//        JSONObject contentTypeJSON = systemJSON.getJSONObject("contentType");
         if(Objects.nonNull(systemJSON.query("/contentType"))) {
             JSONObject contentTypeJSON = systemJSON.getJSONObject("contentType");
             String contentTypeId = contentTypeJSON.query("/system/id").toString();
@@ -267,7 +266,7 @@ public class ContentfulNeo4jService {
                     "n.archived = $contentTypeArchived, n.published = $contentTypePublished";
             String contentTypeRelationship = ("MATCH(n:#type# { id : {id} }) " +
                     "MATCH(m:#contentTypeLinkType# { id : {contentTypeId} }) " +
-                    "CREATE (n)-[:#contentTypeRelation# { linkType: {contentTypeLinkType} }]->(m)");
+                    "MERGE (n)-[:#contentTypeRelation# { linkType: {contentTypeLinkType} }]->(m)");
             try( Session session = driver.session()) {
                 session.run(contentTypeNode.replace("#contentTypeLinkType#", contentTypeLinkType),
                         parameters( "contentTypeId", contentTypeId,
@@ -294,7 +293,7 @@ public class ContentfulNeo4jService {
                 "n.archived = $createdByArchived, n.published = $createdByPublished";
         String createdByRelationship = "MATCH(n:#type# { id : $id }) " +
                 "MATCH(m:#createdByLinkType# { id : {createdById} })" +
-                "CREATE (n)-[:#createdByRelation# { linkType: {createdByLinkType} }]->(m)";
+                "MERGE (n)-[:#createdByRelation# { linkType: {createdByLinkType} }]->(m)";
         try( Session session = driver.session()) {
             session.run(createdByNode.replace("#createdByLinkType#", createdByLinkType),
                     parameters( "createdById", createdById,
@@ -320,7 +319,7 @@ public class ContentfulNeo4jService {
                 "n.archived = $updatedByArchived, n.published = $updatedByPublished";
         String updatedByRelationship = "MATCH(n:#type# { id : {id} }) " +
                 "MATCH(m:#updatedByLinkType# { id : {updatedById} })" +
-                "CREATE (n)-[:#updatedByRelation# { linkType: {updatedByLinkType} }]->(m)";
+                "MERGE (n)-[:#updatedByRelation# { linkType: {updatedByLinkType} }]->(m)";
         try( Session session = driver.session()) {
             session.run(updatedByNode.replace("#updatedByLinkType#", updatedByLinkType),
                     parameters( "updatedById", updatedById,
@@ -346,7 +345,7 @@ public class ContentfulNeo4jService {
                 "n.archived = $publishedByArchived, n.published = $publishedByPublished";
         String publishedByRelationship = "MATCH(n:#type# { id : {id} }) " +
                 "MATCH(m:#publishedByLinkType# { id : {publishedById} })" +
-                "CREATE (n)-[:#publishedByRelation# { linkType: {publishedByLinkType} }]->(m)";
+                "MERGE (n)-[:#publishedByRelation# { linkType: {publishedByLinkType} }]->(m)";
 
         try( Session session = driver.session()) {
             session.run(publishedByNode.replace("#publishedByLinkType#", publishedByLinkType),
@@ -389,5 +388,19 @@ public class ContentfulNeo4jService {
                         !Boolean.valueOf(jsonMap.get("archived").toString()))
                 .filter(jsonMap -> Objects.isNull(jsonMap.get("published")) ||
                         Boolean.valueOf(jsonMap.get("published").toString()))
-                .forEach(this::processContentfulJSONMap);    }
+                .forEach(this::processContentfulJSONMap);
+    }
+    @SuppressWarnings("unchecked")
+    public void createLocaleNode(String jsonEntryArrayString) {
+        logger.info("receive locale json: " + jsonEntryArrayString);
+        JSONArray jsonArray = new JSONArray(jsonEntryArrayString);
+        logger.info("size of json array: " + jsonArray.length());
+        jsonArray.toList().stream()
+                .map(HashMap.class::cast)
+                .filter(jsonMap -> Objects.isNull(jsonMap.get("archived")) ||
+                        !Boolean.valueOf(jsonMap.get("archived").toString()))
+                .filter(jsonMap -> Objects.isNull(jsonMap.get("published")) ||
+                        Boolean.valueOf(jsonMap.get("published").toString()))
+                .forEach(this::processContentfulJSONMap);
+    }
 }
