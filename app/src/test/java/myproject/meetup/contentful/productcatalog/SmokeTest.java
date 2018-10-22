@@ -2,8 +2,10 @@ package myproject.meetup.contentful.productcatalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import myproject.meetup.contentful.productcatalog.api.ContentfulAnalyticsController;
 import myproject.meetup.contentful.productcatalog.api.ContentfulController;
 import myproject.meetup.contentful.productcatalog.api.ContentfulNeo4jController;
+import myproject.meetup.contentful.productcatalog.api.ContentfulNeo4jTransformationController;
 import myproject.meetup.contentful.productcatalog.config.ContentfulProperties;
 import myproject.meetup.contentful.productcatalog.service.ContentfulNeo4jService;
 import myproject.meetup.contentful.productcatalog.web.ProductWebController;
@@ -32,13 +34,21 @@ public class SmokeTest {
     private ContentfulNeo4jService neo4jService;
 
     @InjectMocks
-    private ContentfulNeo4jController neo4jController;
+    private ContentfulNeo4jController contentfulNeo4jController;
+
+    @Autowired
+    private ContentfulAnalyticsController contentfulAnalyticsController;
+
+    @Autowired
+    private ContentfulNeo4jTransformationController contentfulNeo4jTransformationController;
 
     @Test
     public void shouldLoadContext() throws Exception {
         assertThat(contentfulController).isNotNull();
         assertThat(contentfulWebController).isNotNull();
         assertThat(contentfulProperties).isNotNull();
-        assertThat(neo4jController).isNotNull();
+        assertThat(contentfulNeo4jController).isNotNull();
+        assertThat(contentfulAnalyticsController).isNotNull();
+        assertThat(contentfulNeo4jTransformationController).isNotNull();
     }
 }

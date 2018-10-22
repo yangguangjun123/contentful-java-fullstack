@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/contentful/neo4j")
+@RequestMapping(value = "/contentful/neo4j", produces={"application/json","application/xml"})
 public class ContentfulNeo4jController {
 
     private ContentfulNeo4jService neo4jContentfulService;

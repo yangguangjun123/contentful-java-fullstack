@@ -1,6 +1,8 @@
 package myproject.meetup.contentful.productcatalog.api;
 
 import myproject.meetup.contentful.productcatalog.config.ContentfulProperties;
+import myproject.meetup.contentful.productcatalog.config.Neo4jProperties;
+import myproject.meetup.contentful.productcatalog.service.ContentfulNeo4jService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -8,7 +10,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.skyscreamer.jsonassert.JSONAssert;
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +38,14 @@ public class ContentfulAnalyticsControllerIT {
     private ContentfulProperties contentfulProperties;
 
     @Autowired
+    private ContentfulNeo4jService contentfulNeo4jService;
+
+    @Autowired
+    private Neo4jProperties neo4jProperties;
+
+    private Driver driver;
+
+    @Autowired
     private TestRestTemplate testRestTemplate;
 
     private HttpHeaders headers = new HttpHeaders();
@@ -46,11 +59,16 @@ public class ContentfulAnalyticsControllerIT {
         clientRequestFactory.setReadTimeout(60000);
         testRestTemplate.getRestTemplate().setRequestFactory(clientRequestFactory);
 
+        driver = GraphDatabase.driver(neo4jProperties.getDburl(), AuthTokens.basic(neo4jProperties.getDbuser(),
+                neo4jProperties.getDbpassword()));
         this.setupTestData();
     }
 
     @After
     public void tearDown() {
+        try (Session session = driver.session()) {
+            session.run("MATCH (n) DETACH DELETE n");
+        }
     }
 
     @Test
@@ -89,5 +107,9 @@ public class ContentfulAnalyticsControllerIT {
         HttpEntity<String> entityForNeo4j = new HttpEntity<String>(JSONObject.valueToString(arr), headers);
         testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/create/node/label/Entry"),
                 HttpMethod.POST, entityForNeo4j, String.class);
+
+        try (Session session = driver.session()) {
+            session.run("CREATE (n:Orphan {id : 'orphan-node'})");
+        }
     }
 }

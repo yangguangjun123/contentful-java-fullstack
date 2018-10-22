@@ -2,6 +2,7 @@ package myproject.meetup.contentful.productcatalog.service;
 
 import com.contentful.java.cma.CMAClient;
 import com.contentful.java.cma.model.CMAArray;
+import com.contentful.java.cma.model.CMAAsset;
 import com.contentful.java.cma.model.CMAContentType;
 import com.contentful.java.cma.model.CMAEntry;
 import com.contentful.java.cma.model.CMALocale;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -129,5 +129,10 @@ public class ContentfulService {
         } else {
             return Optional.empty();
         }
+    }
+
+    public CMAArray<CMAAsset> getAllContentfulAssets(String spaceName, String accessToken, String environment) {
+        final CMAClient client = getCMAClient(spaceName, accessToken, environment);
+        return client.assets().fetchAll();
     }
 }

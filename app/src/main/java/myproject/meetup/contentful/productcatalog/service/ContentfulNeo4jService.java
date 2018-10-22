@@ -105,10 +105,9 @@ public class ContentfulNeo4jService {
         parameterList.add("id");
         parameterList.add(id);
 
-        if(parameterList.size() > 0) {
+        if(fieldsMap.entrySet().stream().filter(this::isNonSysField).count() > 0) {
             cypherCommandBuilder.append("SET ");
         }
-
         fieldsMap.entrySet()
                 .stream()
                 .filter(this::isNonSysField)
@@ -122,14 +121,16 @@ public class ContentfulNeo4jService {
                 });
 
         // set all properties in one Cypher statement
+        String cypherCommandStr = cypherCommandBuilder.toString().trim();
+        if(cypherCommandStr.endsWith(",")) {
+            cypherCommandStr = cypherCommandStr.substring(0, cypherCommandStr.length() -1);
+        }
         logger.info("parameter list size: " + parameterList.size());
         logger.info("parameter list: " + parameterList);
-        logger.info("run Cypher statement: " + cypherCommandBuilder.toString().substring(0,
-                cypherCommandBuilder.toString().length() - 2).replace("#label#", type)
+        logger.info("run Cypher statement: " + cypherCommandStr.replace("#label#", type)
                 .replace("{id}", id));
         try( Session session = driver.session()) {
-            session.run(cypherCommandBuilder.toString().substring(0, cypherCommandBuilder.toString().length() - 2)
-                            .replace("#label#", type),
+            session.run(cypherCommandStr.replace("#label#", type),
                     parameters( parameterList.toArray(new Object[parameterList.size()])) );
         }
     }
@@ -157,7 +158,7 @@ public class ContentfulNeo4jService {
                                   linkType, relationshipType, linkedId));
                           String createdRelationship = ("MERGE(n:#type# { id : {id} }) " +
                                   "MERGE(m:#linkType# { id : {linkedId} }) " +
-                                  "CREATE (n)-[:#relationshipType# { linkType: {linkType} }]->(m)");
+                                  "MERGE (n)-[:#relationshipType# { linkType: {linkType} }]->(m)");
                           try( Session session = driver.session()) {
                               session.run(createdRelationship.replace("#type#", type)
                                               .replace("#linkType#", linkType)
@@ -228,10 +229,10 @@ public class ContentfulNeo4jService {
                 "n.published = $spacePublished";
         try( Session session = driver.session()) {
             session.run(spaceCreation, parameters( "spaceId", spaceId, "spaceArchived", spaceArchived,
-                    "spacePublished", spaceArchived));
+                    "spacePublished", spacePublished));
         }
 
-        // create content entry/asset/user
+        // create content entry/asset/local/user
         List<String> cypherStatements = new ArrayList<>();
         String type = (String) systemMap.get("type");
         String id = (String) systemMap.get("id");
@@ -239,40 +240,49 @@ public class ContentfulNeo4jService {
         LocalDateTime createdAt = LocalDateTime.parse((String) systemMap.get("createdAt"), formatter);
         LocalDateTime updatedAt = LocalDateTime.parse((String) systemMap.get("updatedAt"), formatter);
         LocalDateTime publishedAt = LocalDateTime.parse((String) systemMap.get("publishedAt"), formatter);
-        String entityNode = ("CREATE (n:#label# { id : {id} }) SET n.createdAt = $createdAt, " +
+        String entityNode = ("MERGE (n:#label# { id : {id} }) SET n.createdAt = $createdAt, " +
                 "n.updatedBy = $updatedAt, " + "n.publishedAt = $publishedAt");
+        String spaceTypeRelationship = ("MATCH(n:Space { id : {spaceId} }) " +
+                "MATCH(m:#type# { id : {id} }) " +
+                "MERGE (m)-[:#spaceRelation# { linkType: {spaceLinkType} }]->(n)");
         try( Session session = driver.session()) {
             session.run(entityNode.replace("#label#", type), parameters( "id", id,
                     "createdAt", createdAt, "updatedAt", updatedAt, "publishedAt", publishedAt ));
+
+            session.run(spaceTypeRelationship.replace("#type#", type)
+                            .replace("#spaceRelation#", spaceRelation),
+                    parameters( "spaceId", spaceId,
+                            "id", id, "spaceLinkType", spaceLinkType));
         }
 
-        JSONObject contentTypeJSON = systemJSON.getJSONObject("contentType");
-        String contentTypeId = contentTypeJSON.query("/system/id").toString();
-        boolean contentTypeArchived = contentTypeJSON.getBoolean("archived");
-        boolean contentTypePublished = contentTypeJSON.getBoolean("published");
-        String contentTypeRelation = contentTypeJSON.query("/system/type").toString();
-        String contentTypeLinkType = contentTypeJSON.query("/system/linkType").toString();
-        String contentTypeNode = "MERGE (n:#contentTypeLinkType# { id : {contentTypeId} }) ON CREATE SET " +
-                "n.archived = $contentTypeArchived, n.published = $contentTypePublished";
-        String contentTypeRelationship = ("MATCH(n:#type# { id : {id} }) " +
-                             "MATCH(m:#contentTypeLinkType# { id : {contentTypeId} }) " +
-                             "CREATE (n)-[:#contentTypeRelation# { linkType: {contentTypeLinkType} }]->(m)");
+        if(Objects.nonNull(systemJSON.query("/contentType"))) {
+            JSONObject contentTypeJSON = systemJSON.getJSONObject("contentType");
+            String contentTypeId = contentTypeJSON.query("/system/id").toString();
+            boolean contentTypeArchived = contentTypeJSON.getBoolean("archived");
+            boolean contentTypePublished = contentTypeJSON.getBoolean("published");
+            String contentTypeRelation = contentTypeJSON.query("/system/type").toString();
+            String contentTypeLinkType = contentTypeJSON.query("/system/linkType").toString();
+            String contentTypeNode = "MERGE (n:#contentTypeLinkType# { id : {contentTypeId} }) ON CREATE SET " +
+                    "n.archived = $contentTypeArchived, n.published = $contentTypePublished";
+            String contentTypeRelationship = ("MATCH(n:#type# { id : {id} }) " +
+                    "MATCH(m:#contentTypeLinkType# { id : {contentTypeId} }) " +
+                    "MERGE (n)-[:#contentTypeRelation# { linkType: {contentTypeLinkType} }]->(m)");
+            try( Session session = driver.session()) {
+                session.run(contentTypeNode.replace("#contentTypeLinkType#", contentTypeLinkType),
+                        parameters( "contentTypeId", contentTypeId,
+                                "contentTypeArchived", contentTypeArchived,
+                                "contentTypePublished", contentTypePublished));
 
-        try( Session session = driver.session()) {
-            session.run(contentTypeNode.replace("#contentTypeLinkType#", contentTypeLinkType),
-                    parameters( "contentTypeId", contentTypeId,
-                            "contentTypeArchived", contentTypeArchived,
-                            "contentTypePublished", contentTypePublished));
-
-            session.run(contentTypeRelationship.replace("#type#", type)
-                                               .replace("#contentTypeLinkType#", contentTypeLinkType)
-                                               .replace("#contentTypeRelation#", contentTypeRelation),
-                    parameters( "id", id,
-                            "contentTypeId", contentTypeId,
-                            "contentTypeLinkType", contentTypeLinkType));
+                session.run(contentTypeRelationship.replace("#type#", type)
+                                .replace("#contentTypeLinkType#", contentTypeLinkType)
+                                .replace("#contentTypeRelation#", contentTypeRelation),
+                        parameters( "id", id,
+                                "contentTypeId", contentTypeId,
+                                "contentTypeLinkType", contentTypeLinkType));
+            }
         }
 
-        // createdBypublishedByPublished
+        // createdBy
         JSONObject createdByJSON = systemJSON.getJSONObject("createdBy");
         String createdById = createdByJSON.query("/system/id").toString();
         boolean createdByArchived = createdByJSON.getBoolean("archived");
@@ -283,7 +293,7 @@ public class ContentfulNeo4jService {
                 "n.archived = $createdByArchived, n.published = $createdByPublished";
         String createdByRelationship = "MATCH(n:#type# { id : $id }) " +
                 "MATCH(m:#createdByLinkType# { id : {createdById} })" +
-                "CREATE (n)-[:#createdByRelation# { linkType: {createdByLinkType} }]->(m)";
+                "MERGE (n)-[:#createdByRelation# { linkType: {createdByLinkType} }]->(m)";
         try( Session session = driver.session()) {
             session.run(createdByNode.replace("#createdByLinkType#", createdByLinkType),
                     parameters( "createdById", createdById,
@@ -309,7 +319,7 @@ public class ContentfulNeo4jService {
                 "n.archived = $updatedByArchived, n.published = $updatedByPublished";
         String updatedByRelationship = "MATCH(n:#type# { id : {id} }) " +
                 "MATCH(m:#updatedByLinkType# { id : {updatedById} })" +
-                "CREATE (n)-[:#updatedByRelation# { linkType: {updatedByLinkType} }]->(m)";
+                "MERGE (n)-[:#updatedByRelation# { linkType: {updatedByLinkType} }]->(m)";
         try( Session session = driver.session()) {
             session.run(updatedByNode.replace("#updatedByLinkType#", updatedByLinkType),
                     parameters( "updatedById", updatedById,
@@ -335,7 +345,7 @@ public class ContentfulNeo4jService {
                 "n.archived = $publishedByArchived, n.published = $publishedByPublished";
         String publishedByRelationship = "MATCH(n:#type# { id : {id} }) " +
                 "MATCH(m:#publishedByLinkType# { id : {publishedById} })" +
-                "CREATE (n)-[:#publishedByRelation# { linkType: {publishedByLinkType} }]->(m)";
+                "MERGE (n)-[:#publishedByRelation# { linkType: {publishedByLinkType} }]->(m)";
 
         try( Session session = driver.session()) {
             session.run(publishedByNode.replace("#publishedByLinkType#", publishedByLinkType),
@@ -365,5 +375,32 @@ public class ContentfulNeo4jService {
             }
         }
         return jsonArray;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void createAssetNode(String jsonEntryArrayString) {
+        logger.info("receive asset json: " + jsonEntryArrayString);
+        JSONArray jsonArray = new JSONArray(jsonEntryArrayString);
+        logger.info("size of json array: " + jsonArray.length());
+        jsonArray.toList().stream()
+                .map(HashMap.class::cast)
+                .filter(jsonMap -> Objects.isNull(jsonMap.get("archived")) ||
+                        !Boolean.valueOf(jsonMap.get("archived").toString()))
+                .filter(jsonMap -> Objects.isNull(jsonMap.get("published")) ||
+                        Boolean.valueOf(jsonMap.get("published").toString()))
+                .forEach(this::processContentfulJSONMap);
+    }
+    @SuppressWarnings("unchecked")
+    public void createLocaleNode(String jsonEntryArrayString) {
+        logger.info("receive locale json: " + jsonEntryArrayString);
+        JSONArray jsonArray = new JSONArray(jsonEntryArrayString);
+        logger.info("size of json array: " + jsonArray.length());
+        jsonArray.toList().stream()
+                .map(HashMap.class::cast)
+                .filter(jsonMap -> Objects.isNull(jsonMap.get("archived")) ||
+                        !Boolean.valueOf(jsonMap.get("archived").toString()))
+                .filter(jsonMap -> Objects.isNull(jsonMap.get("published")) ||
+                        Boolean.valueOf(jsonMap.get("published").toString()))
+                .forEach(this::processContentfulJSONMap);
     }
 }
