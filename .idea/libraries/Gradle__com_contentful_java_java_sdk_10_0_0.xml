@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.contentful.java:java-sdk:10.0.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.contentful.java/java-sdk/10.0.0/3f7b959c0675becc51fb4a700d36822911e333d2/java-sdk-10.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.contentful.java/java-sdk/10.0.0/1a0e4cc6344068bd7e43a8420b1c276911d8cba4/java-sdk-10.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

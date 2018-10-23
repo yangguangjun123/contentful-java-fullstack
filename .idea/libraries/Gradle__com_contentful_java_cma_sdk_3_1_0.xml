@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.contentful.java:cma-sdk:3.1.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.contentful.java/cma-sdk/3.1.0/5d034a6c7d1434af76d62f4c1f944299812cbb00/cma-sdk-3.1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.contentful.java/cma-sdk/3.1.0/e45e94d3f3c3b674a836460d53810714dbce6947/cma-sdk-3.1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
