@@ -1,67 +1,57 @@
 package myproject.meetup.contentful.productcatalog.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("classpath:contentful.properties")
-@ConfigurationProperties
+@PropertySource("classpath:application.properties")
+@ConfigurationProperties(prefix = "contentful")
 public class ContentfulProperties {
 
-    @Value("${contentful.workshop.space.name}")
-    private String workshopSpaceName;
+    private String spaceName;
+    private String organisationName;
+    private String deliveryAccessToken;
+    private String managementAccessToken;
+    private String spaceEnvironment;
 
-    @Value("${contentful.workshop.organisation.name}")
-    private String workshopOrganisationName;
-
-    @Value("${contentful.workshop.delivery.access.token}")
-    private String workshopDeliveryAccessToken;
-
-    @Value("${contentful.workshop.management.access.token}")
-    private String workshopManagementAccessToken;
-
-    @Value("${contentful.workshop.space.environment}")
-    private String workshopSpaceEnvironment;
-
-    public String getWorkshopDeliveryAccessToken() {
-        return workshopDeliveryAccessToken;
+    public String getSpaceName() {
+        return spaceName;
     }
 
-    public void setWorkshopDeliveryAccessToken(String workshopDeliveryAccessToken) {
-        this.workshopDeliveryAccessToken = workshopDeliveryAccessToken;
+    public void setSpaceName(String spaceName) {
+        this.spaceName = spaceName;
     }
 
-    public String getWorkshopManagementAccessToken() {
-        return workshopManagementAccessToken;
+    public String getOrganisationName() {
+        return organisationName;
     }
 
-    public void setWorkshopManagementAccessToken(String workshopManagementAccessToken) {
-        this.workshopManagementAccessToken = workshopManagementAccessToken;
+    public void setOrganisationName(String organisationName) {
+        this.organisationName = organisationName;
     }
 
-    public String getWorkshopSpaceName() {
-        return workshopSpaceName;
+    public String getDeliveryAccessToken() {
+        return deliveryAccessToken;
     }
 
-    public void setWorkshopSpaceName(String workshopSpaceName) {
-        this.workshopSpaceName = workshopSpaceName;
+    public void setDeliveryAccessToken(String deliveryAccessToken) {
+        this.deliveryAccessToken = deliveryAccessToken;
     }
 
-    public String getWorkshopOrganisationName() {
-        return workshopOrganisationName;
+    public String getManagementAccessToken() {
+        return managementAccessToken;
     }
 
-    public void setWorkshopOrganisationName(String workshopOrganisationName) {
-        this.workshopOrganisationName = workshopOrganisationName;
+    public void setManagementAccessToken(String managementAccessToken) {
+        this.managementAccessToken = managementAccessToken;
     }
 
-    public String getWorkshopSpaceEnvironment() {
-        return workshopSpaceEnvironment;
+    public String getSpaceEnvironment() {
+        return spaceEnvironment;
     }
 
-    public void setWorkshopSpaceEnvironment(String workshopSpaceEnvironment) {
-        this.workshopSpaceEnvironment = workshopSpaceEnvironment;
+    public void setSpaceEnvironment(String spaceEnvironment) {
+        this.spaceEnvironment = spaceEnvironment;
     }
 }

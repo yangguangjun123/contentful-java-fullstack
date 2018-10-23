@@ -31,9 +31,9 @@ public class ContentfulNeo4jTransformationController {
 
     @RequestMapping(path = "/default", method= RequestMethod.POST)
     public String transform() {
-        return contentfulNeo4jTransformationService.transform(contentfulProperties.getWorkshopSpaceName(),
-                contentfulProperties.getWorkshopManagementAccessToken(),
-                contentfulProperties.getWorkshopSpaceEnvironment());
+        return contentfulNeo4jTransformationService.transform(contentfulProperties.getSpaceName(),
+                contentfulProperties.getManagementAccessToken(),
+                contentfulProperties.getSpaceEnvironment());
     }
 
 }

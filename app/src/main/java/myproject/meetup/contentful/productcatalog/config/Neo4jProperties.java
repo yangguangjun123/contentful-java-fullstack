@@ -1,22 +1,15 @@
 package myproject.meetup.contentful.productcatalog.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@PropertySource("classpath:neo4j.properties")
-@ConfigurationProperties
+@PropertySource("classpath:application.properties")
+@ConfigurationProperties(prefix = "neo4j")
 public class Neo4jProperties {
-
-    @Value("${neo4j.dburl}")
     private String dburl;
-
-    @Value("${neo4j.dbuser}")
     private String dbuser;
-
-    @Value("${neo4j.dbpassword}")
     private String dbpassword;
 
     public String getDburl() {
