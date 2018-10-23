@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app.iml" group="app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/contentful-workshop.iml" filepath="$PROJECT_DIR$/.idea/modules/contentful-workshop.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/myproject.meetup-app_integrationTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/myproject.meetup-app_integrationTest.iml" group="app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/myproject.meetup-app_main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/myproject.meetup-app_main.iml" group="app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/myproject.meetup-app_test.iml" filepath="$PROJECT_DIR$/.idea/modules/app/myproject.meetup-app_test.iml" group="app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myproject.meetup-contentful-workshop_main.iml" filepath="$PROJECT_DIR$/.idea/modules/myproject.meetup-contentful-workshop_main.iml" group="contentful-workshop" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/myproject.meetup-contentful-workshop_test.iml" filepath="$PROJECT_DIR$/.idea/modules/myproject.meetup-contentful-workshop_test.iml" group="contentful-workshop" />
+    </modules>
+  </component>
+</project>

@@ -19,8 +19,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+@ActiveProfiles("integration")
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ContentfulNeo4jTransformationControllerIT {
@@ -61,11 +63,11 @@ public class ContentfulNeo4jTransformationControllerIT {
         testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/delete/all"),
                 HttpMethod.DELETE, entity, String.class);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/neo4j/transform/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
+        restUrlBuilder.append(contentfulProperties.getSpaceName());
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
+        restUrlBuilder.append(contentfulProperties.getSpaceEnvironment());
         String expected = "{result:success}";
 
         // when
@@ -98,11 +100,11 @@ public class ContentfulNeo4jTransformationControllerIT {
         testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/delete/all"),
                 HttpMethod.DELETE, entity, String.class);
         StringBuilder restUrlBuilder = new StringBuilder("/contentful/contententry/get/objectKey/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceName());
+        restUrlBuilder.append(contentfulProperties.getSpaceName());
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopManagementAccessToken());
+        restUrlBuilder.append(contentfulProperties.getManagementAccessToken());
         restUrlBuilder.append("/");
-        restUrlBuilder.append(contentfulProperties.getWorkshopSpaceEnvironment());
+        restUrlBuilder.append(contentfulProperties.getSpaceEnvironment());
         ResponseEntity<String> response = testRestTemplate.exchange(
                 createURLWithPort(restUrlBuilder.toString()),
                 HttpMethod.GET, entity, String.class);

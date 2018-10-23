@@ -35,8 +35,8 @@ public class ContentfulService {
     public void init() {
         CMAClient client = new CMAClient
                 .Builder()
-                .setAccessToken(contentfulProperties.getWorkshopManagementAccessToken())
-                .setEnvironmentId(contentfulProperties.getWorkshopSpaceEnvironment())
+                .setAccessToken(contentfulProperties.getManagementAccessToken())
+                .setEnvironmentId(contentfulProperties.getSpaceEnvironment())
                 .build();
         client.spaces().fetchAll().getItems()
                 .stream()
