@@ -59,6 +59,25 @@ public class ContentfulNeo4jService {
         }
     }
 
+    public void deleteAllUserRelationship() {
+        try (Session session = driver.session()) {
+            session.run("MATCH (n:User) DETACH DELETE n");
+        }
+    }
+
+    public String retriveAll() {
+        JSONArray jsonArray = new JSONArray();
+        Gson gson = new Gson();
+        try (Session session = driver.session()) {
+            StatementResult result = session.run("MATCH (n) RETURN n");
+            while ( result.hasNext() ) {
+                Record record = result.next();
+                jsonArray.put(gson.toJson(record.asMap()));
+            }
+        }
+        return jsonArray.toString();
+    }
+
     @SuppressWarnings("unchecked")
     public void createEntryNode(String jsonEntryArrayString) {
         logger.info("receive entry json: " + jsonEntryArrayString);
@@ -87,9 +106,40 @@ public class ContentfulNeo4jService {
         String type = ((Map<String, Object>) contentfulMap.get("system")).get("type").toString();
 
         // process fields map
-        processContentfulFieldsMap((String) contentfulMap.get("id"), type,
-                (Map<String, Object> ) contentfulMap.get("fields"));
+        if(contentfulMap.get("fields") instanceof Map) {
+            processContentfulFieldsMap((String) contentfulMap.get("id"), type,
+                    (Map<String, Object> ) contentfulMap.get("fields"));
+        } else if(contentfulMap.get("fields") instanceof List) {
+            processContentfulFieldsList((String) contentfulMap.get("id"), type,
+                    (List<Object> ) contentfulMap.get("fields"));
+        } else {
+            logger.info("unknow type: " + contentfulMap.get("fields").getClass().getName());
+        }
+    }
 
+    private void processContentfulFieldsList(String id, String type, List<Object> fields) {
+        // process non-sys fields
+        StringBuilder cypherCommandBuilder = new StringBuilder("MERGE (n:#label# { id : {id} }) ");
+        List<Object> parameterList = new ArrayList<>();
+        parameterList.add("id");
+        parameterList.add(id);
+
+        if(fields.size() > 0) {
+            cypherCommandBuilder.append(String.format("SET n.fields = apoc.convert.toJson( $value )"));
+        }
+
+        // set all properties in one Cypher statement
+        String cypherCommandStr = cypherCommandBuilder.toString().trim();
+        if(cypherCommandStr.endsWith(",")) {
+            cypherCommandStr = cypherCommandStr.substring(0, cypherCommandStr.length() -1);
+        }
+        logger.info("parameter list size: " + parameterList.size());
+        logger.info("parameter list: " + parameterList);
+        logger.info("run Cypher statement: " + cypherCommandStr.replace("#label#", type));
+        try( Session session = driver.session()) {
+            session.run(cypherCommandStr.replace("#label#", type),
+                    parameters( "id", id, "value", fields ));
+        }
     }
 
     private void processContentfulFieldsMap(String id, String type, Map<String, Object> fieldsMap) {
@@ -127,8 +177,7 @@ public class ContentfulNeo4jService {
         }
         logger.info("parameter list size: " + parameterList.size());
         logger.info("parameter list: " + parameterList);
-        logger.info("run Cypher statement: " + cypherCommandStr.replace("#label#", type)
-                .replace("{id}", id));
+        logger.info("run Cypher statement: " + cypherCommandStr.replace("#label#", type));
         try( Session session = driver.session()) {
             session.run(cypherCommandStr.replace("#label#", type),
                     parameters( parameterList.toArray(new Object[parameterList.size()])) );
@@ -225,12 +274,12 @@ public class ContentfulNeo4jService {
         String spaceLinkType = spaceJson.query("/system/linkType").toString();
 
         // create space
-        String spaceCreation = "MERGE (n:Space { id : {spaceId} }) SET n.archived = $spaceArchived, " +
-                "n.published = $spacePublished";
-        try( Session session = driver.session()) {
-            session.run(spaceCreation, parameters( "spaceId", spaceId, "spaceArchived", spaceArchived,
-                    "spacePublished", spacePublished));
-        }
+//        String spaceCreation = "MERGE (n:Space { id : {spaceId} }) SET n.archived = $spaceArchived, " +
+//                "n.published = $spacePublished";
+//        try( Session session = driver.session()) {
+//            session.run(spaceCreation, parameters( "spaceId", spaceId, "spaceArchived", spaceArchived,
+//                    "spacePublished", spacePublished));
+//        }
 
         // create content entry/asset/local/user
         List<String> cypherStatements = new ArrayList<>();
@@ -242,17 +291,17 @@ public class ContentfulNeo4jService {
         LocalDateTime publishedAt = LocalDateTime.parse((String) systemMap.get("publishedAt"), formatter);
         String entityNode = ("MERGE (n:#label# { id : {id} }) SET n.createdAt = $createdAt, " +
                 "n.updatedBy = $updatedAt, " + "n.publishedAt = $publishedAt");
-        String spaceTypeRelationship = ("MATCH(n:Space { id : {spaceId} }) " +
-                "MATCH(m:#type# { id : {id} }) " +
-                "MERGE (m)-[:#spaceRelation# { linkType: {spaceLinkType} }]->(n)");
+//        String spaceTypeRelationship = ("MATCH(n:Space { id : {spaceId} }) " +
+//                "MATCH(m:#type# { id : {id} }) " +
+//                "MERGE (m)-[:#spaceRelation# { linkType: {spaceLinkType} }]->(n)");
         try( Session session = driver.session()) {
             session.run(entityNode.replace("#label#", type), parameters( "id", id,
                     "createdAt", createdAt, "updatedAt", updatedAt, "publishedAt", publishedAt ));
 
-            session.run(spaceTypeRelationship.replace("#type#", type)
-                            .replace("#spaceRelation#", spaceRelation),
-                    parameters( "spaceId", spaceId,
-                            "id", id, "spaceLinkType", spaceLinkType));
+//            session.run(spaceTypeRelationship.replace("#type#", type)
+//                            .replace("#spaceRelation#", spaceRelation),
+//                    parameters( "spaceId", spaceId,
+//                            "id", id, "spaceLinkType", spaceLinkType));
         }
 
         if(Objects.nonNull(systemJSON.query("/contentType"))) {

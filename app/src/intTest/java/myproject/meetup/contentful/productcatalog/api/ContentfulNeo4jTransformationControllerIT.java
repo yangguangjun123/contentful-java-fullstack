@@ -4,6 +4,7 @@ import myproject.meetup.contentful.productcatalog.config.ContentfulProperties;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +21,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.validation.constraints.AssertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -51,7 +54,6 @@ public class ContentfulNeo4jTransformationControllerIT {
 
     @After
     public void tearDown() {
-        setupTestData();
     }
 
     @Test
@@ -66,14 +68,17 @@ public class ContentfulNeo4jTransformationControllerIT {
         restUrlBuilder.append(contentfulProperties.getManagementAccessToken());
         restUrlBuilder.append("/");
         restUrlBuilder.append(contentfulProperties.getSpaceEnvironment());
-        String expected = "{result:success}";
 
         // when
         ResponseEntity<String> response = testRestTemplate.exchange(createURLWithPort(restUrlBuilder.toString()),
                 HttpMethod.POST, entity, String.class);
 
         // verify
-        JSONAssert.assertEquals(expected, response.getBody(), false);
+        JSONObject json = new JSONObject(response.getBody());
+        Assert.assertNotNull(json.get("content"));
+        Assert.assertTrue(new JSONObject(json.get("content").toString()).length() == 4);
+        Assert.assertNotNull(json.get("neo4j"));
+        Assert.assertTrue(new JSONArray(json.get("neo4j").toString()).length() > 0);
     }
 
     @Test
@@ -90,7 +95,11 @@ public class ContentfulNeo4jTransformationControllerIT {
                 HttpMethod.POST, entity, String.class);
 
         // verify
-        JSONAssert.assertEquals(expected, response.getBody(), false);
+        JSONObject json = new JSONObject(response.getBody());
+        Assert.assertNotNull(json.get("content"));
+        Assert.assertTrue(new JSONObject(json.get("content").toString()).length() == 4);
+        Assert.assertNotNull(json.get("neo4j"));
+        Assert.assertTrue(new JSONArray(json.get("neo4j").toString()).length() > 0);
     }
 
     private void setupTestData() {
