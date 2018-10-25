@@ -4,5 +4,3 @@ to provide the insights of the conteful space. For example it can be used to ana
 contentful space. The library is developed using Contentful API, Neo4j database and Spring Boot and is exposed as Rest 
 APIs. The application is deployed on Heroku cloud platform and can be accessed at 
 https://contentful-neo4j-transform.herokuapp.com URL.
-
-Heroku deploy [25/10/2018, 10:32am]
