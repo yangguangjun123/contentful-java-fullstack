@@ -62,3 +62,7 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTest
+
+task stage {
+    dependsOn bootJar
+}
