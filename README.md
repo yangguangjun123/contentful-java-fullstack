@@ -5,4 +5,4 @@ contentful space. The library is developed using Contentful API, Neo4j database 
 APIs. The application is deployed on Heroku cloud platform and can be accessed at 
 https://contentful-neo4j-transform.herokuapp.com URL.
 
-Heroku deploy [25/10/2018, 10:22am]
+Heroku deploy [25/10/2018, 10:27am]
