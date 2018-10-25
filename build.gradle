@@ -37,6 +37,22 @@ allprojects {
             exclude group: "com.vaadin.external.google", module: "android-json"
         }
     }
+
+    afterEvaluate {
+        def buildTask = tasks.findByPath('build')
+        if (buildTask) {
+            task buildNoTests {
+                dependsOn buildTask
+            }
+            gradle.taskGraph.whenReady { TaskExecutionGraph graph ->
+                if (graph.hasTask(buildNoTests)) {
+                    def skipNames = ['test', 'integrationTest'] as Set
+                    Collection<Task> testTasks = graph.allTasks.findAll { skipNames.contains(it.name) }
+                    testTasks.each { it.enabled = false }
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -63,3 +79,6 @@ jar {
 wrapper {
     gradleVersion = '4.8'
 }
+
+task stage(dependsOn: ['buildNoTests', 'clean'])
+build.mustRunAfter clean

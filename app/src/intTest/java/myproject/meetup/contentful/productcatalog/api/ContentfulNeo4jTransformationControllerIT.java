@@ -75,6 +75,7 @@ public class ContentfulNeo4jTransformationControllerIT {
 
         // verify
         JSONObject json = new JSONObject(response.getBody());
+        logger.info("json (shouldTransformContentfulModelToNeo4j): " + json);
         Assert.assertNotNull(json.get("content"));
         Assert.assertTrue(new JSONObject(json.get("content").toString()).length() == 4);
         Assert.assertNotNull(json.get("neo4j"));
@@ -96,6 +97,7 @@ public class ContentfulNeo4jTransformationControllerIT {
 
         // verify
         JSONObject json = new JSONObject(response.getBody());
+        logger.info("json (shouldTransformContententfulModelToNeo4jWithoutPassingParameters): " + json);
         Assert.assertNotNull(json.get("content"));
         Assert.assertTrue(new JSONObject(json.get("content").toString()).length() == 4);
         Assert.assertNotNull(json.get("neo4j"));
