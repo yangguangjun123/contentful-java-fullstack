@@ -1,4 +1,3 @@
-rootProject.name = 'contentful-workshop'
+rootProject.name = 'contentful-neo4j-java'
 
 include 'app'
-
