@@ -1,11 +1,11 @@
-package myproject.meetup.contentful.productcatalog.api;
+package myproject.contentful.productcatalog.api;
 
 import com.contentful.java.cma.model.CMAArray;
 import com.contentful.java.cma.model.CMAContentType;
 import com.contentful.java.cma.model.CMAEntry;
 import com.contentful.java.cma.model.CMALocale;
 import com.contentful.java.cma.model.CMASpace;
-import myproject.meetup.contentful.productcatalog.service.ContentfulService;
+import myproject.contentful.productcatalog.service.ContentfulService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,22 +16,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
+@SuppressWarnings("unused")
 @RestController
 @RequestMapping(value = "/contentful", produces={"application/json","application/xml"})
 public class ContentfulController {
-
-    private ContentfulService contentfulSpaceService;
-    private static final int SUCCESS = 204;
+    private final ContentfulService contentfulService;
 
     @Autowired
-    public ContentfulController(ContentfulService contentfulSpaceService) {
-        this.contentfulSpaceService = contentfulSpaceService;
+    public ContentfulController(ContentfulService contentfulService) {
+        this.contentfulService = contentfulService;
     }
 
     @RequestMapping(path = "/space/get/objectKey/{spaceName}/{accessToken}/{environment}", method= RequestMethod.GET)
     public String getSpaceByName(@PathVariable String spaceName, @PathVariable String accessToken,
                                @PathVariable String  environment) {
-        Optional<CMASpace> spaceOptional = contentfulSpaceService.getContentfulSpace(spaceName, accessToken, environment);
+        Optional<CMASpace> spaceOptional = contentfulService.getContentfulSpace(spaceName,
+                accessToken, environment);
         JSONObject response = new JSONObject();
         if(spaceOptional.isPresent()) {
             response.put("id", spaceOptional.get().getId());
@@ -47,13 +47,13 @@ public class ContentfulController {
             method= RequestMethod.DELETE)
     public String deleteSpaceByName(@PathVariable String spaceName, @PathVariable String accessToken,
                                @PathVariable String  environment) {
-        Integer code = contentfulSpaceService.deleteContentfulSpace(spaceName, accessToken, environment);
+        Integer code = contentfulService.deleteContentfulSpace(spaceName, accessToken, environment);
         JSONObject response = new JSONObject();
-        if(code == SUCCESS || code == ContentfulService.SPACE_NOT_EXISTS) {
+        if(code == ContentfulService.SUCCESS || code == ContentfulService.SPACE_NOT_EXISTS) {
             response.put("result", "success");
         } else {
             response.put("result", "fail");
-            response.put("erorCode", code);
+            response.put("errorCode", code);
         }
         return response.toString();
     }
@@ -62,7 +62,7 @@ public class ContentfulController {
                             method= RequestMethod.POST)
     public String createSpace(@PathVariable String spaceName, @PathVariable String accessToken,
                               @PathVariable String  environment, @RequestParam String organisation) {
-        Optional<CMASpace> spaceOptional = contentfulSpaceService.createContentfulSpace(accessToken, environment,
+        Optional<CMASpace> spaceOptional = contentfulService.createContentfulSpace(accessToken, environment,
                 spaceName,  organisation);
         JSONObject response = new JSONObject();
         if(spaceOptional.isPresent()) {
@@ -82,7 +82,7 @@ public class ContentfulController {
      */
     @RequestMapping(path = "/space/updateCach", method= RequestMethod.PUT)
     public String updateSpaceCach() {
-        contentfulSpaceService.init();
+        contentfulService.init();
         JSONObject response = new JSONObject();
         response.put("result", "success");
         return response.toString();
@@ -92,7 +92,7 @@ public class ContentfulController {
                             method= RequestMethod.GET)
     public String getAllContentTypes(@PathVariable String spaceName, @PathVariable String accessToken,
                                @PathVariable String  environment) {
-        CMAArray<CMAContentType> types = contentfulSpaceService.getAllContentfulTypes(spaceName,
+        CMAArray<CMAContentType> types = contentfulService.getAllContentfulTypes(spaceName,
                 accessToken, environment);
         JSONObject obj = new JSONObject(types);
         JSONObject response = new JSONObject();
@@ -104,7 +104,7 @@ public class ContentfulController {
             method= RequestMethod.GET)
     public String getAllContentEntries(@PathVariable String spaceName, @PathVariable String accessToken,
                                      @PathVariable String  environment) {
-        CMAArray<CMAEntry> entries = contentfulSpaceService.getAllContentfulEntries(spaceName,
+        CMAArray<CMAEntry> entries = contentfulService.getAllContentfulEntries(spaceName,
                 accessToken, environment);
         JSONObject obj = new JSONObject(entries);
         JSONObject response = new JSONObject();
@@ -116,7 +116,7 @@ public class ContentfulController {
             method= RequestMethod.GET)
     public String getAllContentAssets(@PathVariable String spaceName, @PathVariable String accessToken,
                                        @PathVariable String  environment) {
-        CMAArray<CMAEntry> entries = contentfulSpaceService.getAllContentfulEntries(spaceName,
+        CMAArray<CMAEntry> entries = contentfulService.getAllContentfulEntries(spaceName,
                 accessToken, environment);
         JSONObject obj = new JSONObject(entries);
         JSONObject response = new JSONObject();
@@ -128,7 +128,7 @@ public class ContentfulController {
             method= RequestMethod.GET)
     public String getAllContentLocales(@PathVariable String spaceName, @PathVariable String accessToken,
                                       @PathVariable String  environment) {
-        CMAArray<CMALocale> entries = contentfulSpaceService.getAllContentfulLocales(spaceName,
+        CMAArray<CMALocale> entries = contentfulService.getAllContentfulLocales(spaceName,
                 accessToken, environment);
         JSONObject obj = new JSONObject(entries);
         JSONObject response = new JSONObject();

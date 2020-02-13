@@ -1,9 +1,10 @@
-package myproject.meetup.contentful.productcatalog.config;
+package myproject.contentful.productcatalog.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+@SuppressWarnings("unused")
 @Configuration
 @PropertySource("classpath:application.properties")
 @ConfigurationProperties(prefix = "contentful")

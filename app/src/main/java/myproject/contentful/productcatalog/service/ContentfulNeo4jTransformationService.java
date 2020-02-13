@@ -1,4 +1,4 @@
-package myproject.meetup.contentful.productcatalog.service;
+package myproject.contentful.productcatalog.service;
 
 import com.contentful.java.cma.model.CMAArray;
 import com.contentful.java.cma.model.CMAAsset;
@@ -14,50 +14,50 @@ import org.springframework.stereotype.Service;
 @Service
 public class ContentfulNeo4jTransformationService {
 
-    private ContentfulService contentfulSpaceService;
-    private ContentfulNeo4jService contentfulNeo4jService;
+    private final ContentfulService contentfulSpaceService;
+    private final Neo4jDatabaseService neo4JDatabaseService;
 
     private static final Logger logger = LoggerFactory.getLogger(ContentfulNeo4jTransformationService.class);
 
     @Autowired
     public ContentfulNeo4jTransformationService(ContentfulService contentfulSpaceService,
-                                                   ContentfulNeo4jService contentfulNeo4jService) {
+                                                   Neo4jDatabaseService neo4JDatabaseService) {
         this.contentfulSpaceService = contentfulSpaceService;
-        this.contentfulNeo4jService = contentfulNeo4jService;
+        this.neo4JDatabaseService = neo4JDatabaseService;
     }
 
     public String transform(String spaceName, String accessToken, String  environment) {
         JSONObject response = new JSONObject();
 
         JSONObject contentfulResponse = new JSONObject();
-        contentfulNeo4jService.deleteAll();
+        neo4JDatabaseService.deleteAll();
 
         CMAArray<CMAContentType> entryTypes = contentfulSpaceService.getAllContentfulTypes(spaceName,
                 accessToken, environment);
         JSONObject entryTypeJson = new JSONObject(entryTypes);
-        contentfulNeo4jService.createEntryNode(entryTypeJson.getJSONArray("items").toString());
+        neo4JDatabaseService.createEntryNode(entryTypeJson.getJSONArray("items").toString());
         contentfulResponse.put("contentEntryType", entryTypeJson.getJSONArray("items"));
 
         CMAArray<CMAEntry> entries = contentfulSpaceService.getAllContentfulEntries(spaceName,
                 accessToken, environment);
         JSONObject entryJson = new JSONObject(entries);
-        contentfulNeo4jService.createEntryNode(entryJson.getJSONArray("items").toString());
+        neo4JDatabaseService.createEntryNode(entryJson.getJSONArray("items").toString());
         contentfulResponse.put("contentEntry", entryJson.getJSONArray("items"));
 
         CMAArray<CMAAsset> assets = contentfulSpaceService.getAllContentfulAssets(spaceName, accessToken, environment);
         JSONObject assetJson = new JSONObject(assets);
-        contentfulNeo4jService.createAssetNode(assetJson.getJSONArray("items").toString());
+        neo4JDatabaseService.createAssetNode(assetJson.getJSONArray("items").toString());
         contentfulResponse.put("contentAsset", assetJson.getJSONArray("items"));
 
         CMAArray<CMALocale> locales = contentfulSpaceService.getAllContentfulLocales(spaceName, accessToken, environment);
         JSONObject localJson = new JSONObject(locales);
-        contentfulNeo4jService.createLocaleNode(localJson.getJSONArray("items").toString());
+        neo4JDatabaseService.createLocaleNode(localJson.getJSONArray("items").toString());
         contentfulResponse.put("contentLocale", localJson.getJSONArray("items"));
         response.put("content", contentfulResponse);
 
-        contentfulNeo4jService.deleteAllUserRelationship();
+        neo4JDatabaseService.deleteAllUserRelationship();
 
-        response.put("neo4j", contentfulNeo4jService.retriveAll());
+        response.put("neo4j", neo4JDatabaseService.retrieveAll());
         logger.info("response: " + response.toString());
 
         return response.toString();

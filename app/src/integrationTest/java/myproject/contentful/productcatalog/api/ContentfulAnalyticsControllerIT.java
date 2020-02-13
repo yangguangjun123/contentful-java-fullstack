@@ -1,6 +1,8 @@
-package myproject.meetup.contentful.productcatalog.api;
+package myproject.contentful.productcatalog.api;
 
-import myproject.meetup.contentful.productcatalog.config.ContentfulProperties;
+import myproject.contentful.productcatalog.config.ContentfulProperties;
+import myproject.contentful.productcatalog.config.Neo4jProperties;
+import myproject.contentful.productcatalog.service.Neo4jDatabaseService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -8,7 +10,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.skyscreamer.jsonassert.JSONAssert;
+import org.neo4j.driver.AuthTokens;
+import org.neo4j.driver.Driver;
+import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,27 +27,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.validation.constraints.AssertTrue;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ContentfulNeo4jTransformationControllerIT {
+public class ContentfulAnalyticsControllerIT {
 
     @LocalServerPort
     private int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
     private ContentfulProperties contentfulProperties;
 
-    private HttpHeaders headers = new HttpHeaders();
+    @Autowired
+    private Neo4jDatabaseService neo4jDatabaseService;
+
+    @Autowired
+    private Neo4jProperties neo4jProperties;
+
+    private Driver driver;
 
     @Autowired
     private TestRestTemplate testRestTemplate;
 
-    private static final Logger logger = LoggerFactory.getLogger(ContentfulNeo4jTransformationControllerIT.class);
+    private HttpHeaders headers = new HttpHeaders();
+
+    private static final Logger logger = LoggerFactory.getLogger(Neo4jControllerIT.class);
 
     @Before
     public void setUp() {
@@ -50,58 +58,35 @@ public class ContentfulNeo4jTransformationControllerIT {
         // set the read timeot, this value is in miliseconds
         clientRequestFactory.setReadTimeout(60000);
         testRestTemplate.getRestTemplate().setRequestFactory(clientRequestFactory);
+
+        driver = GraphDatabase.driver(neo4jProperties.getDburl(), AuthTokens.basic(neo4jProperties.getDbuser(),
+                neo4jProperties.getDbpassword()));
+        this.setupTestData();
     }
 
     @After
     public void tearDown() {
+        try (Session session = driver.session()) {
+            session.run("MATCH (n) DETACH DELETE n");
+        }
     }
 
     @Test
-    public void shouldTransformContentfulModelToNeo4j() {
+    public void shouldReturnOrphanContentfulRecords() {
         // given
         HttpEntity<String> entity = new HttpEntity<>("", headers);
-        testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/delete/all"),
-                HttpMethod.DELETE, entity, String.class);
-        StringBuilder restUrlBuilder = new StringBuilder("/contentful/neo4j/transform/");
-        restUrlBuilder.append(contentfulProperties.getSpaceName());
-        restUrlBuilder.append("/");
-        restUrlBuilder.append(contentfulProperties.getManagementAccessToken());
-        restUrlBuilder.append("/");
-        restUrlBuilder.append(contentfulProperties.getSpaceEnvironment());
 
         // when
-        ResponseEntity<String> response = testRestTemplate.exchange(createURLWithPort(restUrlBuilder.toString()),
-                HttpMethod.POST, entity, String.class);
+        ResponseEntity<String> response = testRestTemplate.exchange(createURLWithPort(
+                "/contentful/analytics/orphan"), HttpMethod.GET, entity, String.class);
 
         // verify
         JSONObject json = new JSONObject(response.getBody());
-        logger.info("json (shouldTransformContentfulModelToNeo4j): " + json);
-        Assert.assertNotNull(json.get("content"));
-        Assert.assertTrue(new JSONObject(json.get("content").toString()).length() == 4);
-        Assert.assertNotNull(json.get("neo4j"));
-        Assert.assertTrue(new JSONArray(json.get("neo4j").toString()).length() > 0);
+        Assert.assertTrue(json.getJSONArray("orphans").length() == 1);
     }
 
-    @Test
-    public void shouldTransformContententfulModelToNeo4jWithoutPassingParameters(){
-        // given
-        HttpEntity<String> entity = new HttpEntity<>("", headers);
-        testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/delete/all"),
-                HttpMethod.DELETE, entity, String.class);
-        StringBuilder restUrlBuilder = new StringBuilder("/contentful/neo4j/transform/default");
-        String expected = "{result:success}";
-
-        // when
-        ResponseEntity<String> response = testRestTemplate.exchange(createURLWithPort(restUrlBuilder.toString()),
-                HttpMethod.POST, entity, String.class);
-
-        // verify
-        JSONObject json = new JSONObject(response.getBody());
-        logger.info("json (shouldTransformContententfulModelToNeo4jWithoutPassingParameters): " + json);
-        Assert.assertNotNull(json.get("content"));
-        Assert.assertTrue(new JSONObject(json.get("content").toString()).length() == 4);
-        Assert.assertNotNull(json.get("neo4j"));
-        Assert.assertTrue(new JSONArray(json.get("neo4j").toString()).length() > 0);
+    private String createURLWithPort(String uri) {
+        return "http://localhost:" + port + uri;
     }
 
     private void setupTestData() {
@@ -122,10 +107,9 @@ public class ContentfulNeo4jTransformationControllerIT {
         HttpEntity<String> entityForNeo4j = new HttpEntity<String>(JSONObject.valueToString(arr), headers);
         testRestTemplate.exchange(createURLWithPort("/contentful/neo4j/create/node/label/Entry"),
                 HttpMethod.POST, entityForNeo4j, String.class);
-    }
 
-    private String createURLWithPort(String uri) {
-        return "http://localhost:" + port + uri;
+        try (Session session = driver.session()) {
+            session.run("CREATE (n:Orphan {id : 'orphan-node'})");
+        }
     }
-
 }

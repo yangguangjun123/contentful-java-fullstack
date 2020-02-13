@@ -1,6 +1,6 @@
-package myproject.meetup.contentful.productcatalog.api;
+package myproject.contentful.productcatalog.api;
 
-import myproject.meetup.contentful.productcatalog.config.ContentfulProperties;
+import myproject.contentful.productcatalog.config.ContentfulProperties;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

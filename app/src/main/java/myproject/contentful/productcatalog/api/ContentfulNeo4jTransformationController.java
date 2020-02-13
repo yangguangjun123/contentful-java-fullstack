@@ -1,19 +1,20 @@
-package myproject.meetup.contentful.productcatalog.api;
+package myproject.contentful.productcatalog.api;
 
-import myproject.meetup.contentful.productcatalog.config.ContentfulProperties;
-import myproject.meetup.contentful.productcatalog.service.ContentfulNeo4jTransformationService;
+import myproject.contentful.productcatalog.config.ContentfulProperties;
+import myproject.contentful.productcatalog.service.ContentfulNeo4jTransformationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+@SuppressWarnings("unused")
 @RestController
 @RequestMapping(value = "/contentful/neo4j/transform", produces={"application/json","application/xml"})
 public class ContentfulNeo4jTransformationController {
 
-    private ContentfulNeo4jTransformationService contentfulNeo4jTransformationService;
-    private ContentfulProperties contentfulProperties;
+    private final ContentfulNeo4jTransformationService contentfulNeo4jTransformationService;
+    private final ContentfulProperties contentfulProperties;
 
     @Autowired
     public ContentfulNeo4jTransformationController(
