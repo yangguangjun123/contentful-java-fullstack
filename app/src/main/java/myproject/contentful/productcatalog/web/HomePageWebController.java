@@ -1,4 +1,4 @@
-package myproject.meetup.contentful.productcatalog.web;
+package myproject.contentful.productcatalog.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

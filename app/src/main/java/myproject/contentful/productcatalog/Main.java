@@ -1,4 +1,4 @@
-package myproject.meetup.contentful.productcatalog;
+package myproject.contentful.productcatalog;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

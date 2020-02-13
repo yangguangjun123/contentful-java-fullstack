@@ -1,4 +1,4 @@
-package myproject.meetup.contentful.productcatalog.web;
+package myproject.contentful.productcatalog.web;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -1,16 +1,16 @@
-package myproject.meetup.contentful.productcatalog.service;
+package myproject.contentful.productcatalog.service;
 
 import com.google.gson.Gson;
 import com.jayway.jsonpath.JsonPath;
-import myproject.meetup.contentful.productcatalog.config.Neo4jProperties;
+import myproject.contentful.productcatalog.config.Neo4jProperties;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.neo4j.driver.v1.AuthTokens;
-import org.neo4j.driver.v1.Driver;
-import org.neo4j.driver.v1.GraphDatabase;
-import org.neo4j.driver.v1.Record;
-import org.neo4j.driver.v1.Session;
-import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.AuthTokens;
+import org.neo4j.driver.Driver;
+import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.Record;
+import org.neo4j.driver.Result;
+import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,18 +27,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static org.neo4j.driver.v1.Values.parameters;
+import static org.neo4j.driver.Values.parameters;
 
+@SuppressWarnings("unchecked")
 @Service
-public class ContentfulNeo4jService {
+public class Neo4jDatabaseService {
 
-    private Neo4jProperties neo4jProperties;
+    private final Neo4jProperties neo4jProperties;
     private Driver driver;
 
-    private static final Logger logger = LoggerFactory.getLogger(ContentfulNeo4jService.class);
+    private static final Logger logger = LoggerFactory.getLogger(Neo4jDatabaseService.class);
 
     @Autowired
-    public ContentfulNeo4jService(Neo4jProperties neo4jProperties) {
+    public Neo4jDatabaseService(Neo4jProperties neo4jProperties) {
         this.neo4jProperties = neo4jProperties;
     }
 
@@ -65,11 +66,11 @@ public class ContentfulNeo4jService {
         }
     }
 
-    public String retriveAll() {
+    public String retrieveAll() {
         JSONArray jsonArray = new JSONArray();
         Gson gson = new Gson();
         try (Session session = driver.session()) {
-            StatementResult result = session.run("MATCH (n) RETURN n");
+            Result result = session.run("MATCH (n) RETURN n");
             while ( result.hasNext() ) {
                 Record record = result.next();
                 jsonArray.put(gson.toJson(record.asMap()));
@@ -78,18 +79,18 @@ public class ContentfulNeo4jService {
         return jsonArray.toString();
     }
 
-    @SuppressWarnings("unchecked")
     public void createEntryNode(String jsonEntryArrayString) {
         logger.info("receive entry json: " + jsonEntryArrayString);
         JSONArray jsonArray = new JSONArray(jsonEntryArrayString);
         logger.info("size of json array: " + jsonArray.length());
         jsonArray.toList().stream()
-                          .map(HashMap.class::cast)
+                          .map(Map.class::cast)
                           .filter(jsonMap -> Objects.isNull(jsonMap.get("archived")) ||
                                   !Boolean.valueOf(jsonMap.get("archived").toString()))
                           .filter(jsonMap -> Objects.isNull(jsonMap.get("published")) ||
                                     Boolean.valueOf(jsonMap.get("published").toString()))
                           .forEach(this::processContentfulJSONMap);
+
     }
 
     @SuppressWarnings("unchecked")
@@ -99,7 +100,7 @@ public class ContentfulNeo4jService {
                      .stream()
                      .filter(entry -> entry.getKey().equals("system"))
                      .map(entry -> entry.getValue())
-                     .map(HashMap.class::cast)
+                     .map(Map.class::cast)
                      .forEach(this::processContentfulSystemMap);
 
         @SuppressWarnings("unchecked")
@@ -113,7 +114,7 @@ public class ContentfulNeo4jService {
             processContentfulFieldsList((String) contentfulMap.get("id"), type,
                     (List<Object> ) contentfulMap.get("fields"));
         } else {
-            logger.info("unknow type: " + contentfulMap.get("fields").getClass().getName());
+            logger.info("unknown type: " + contentfulMap.get("fields").getClass().getName());
         }
     }
 
@@ -197,7 +198,7 @@ public class ContentfulNeo4jService {
         entryJson.put(entry.getKey(), entry.getValue());
         JSONArray array = new JSONArray(JsonPath.parse(entryJson.toString()).read("$..[?(@.sys)]").toString());
         array.toList().stream()
-                      .map(HashMap.class::cast)
+                      .map(Map.class::cast)
                       .map(m ->new JSONObject(m))
                       .forEach(json -> {
                           String linkType= json.query("/sys/linkType").toString();
@@ -245,8 +246,9 @@ public class ContentfulNeo4jService {
                 replace("#propertyName#", getKeyPath(entryMap)).
                 replace("{id}", id).replace("#label#", type));
         try( Session session = driver.session()) {
-            session.run(updateNode.replace("#label#", type).replace("#propertyName#", getKeyPath(entryMap)),
-                    parameters( "id", id, "value", getValueOfNestedMap(entryMap) ));
+            session.run(updateNode.replace("#label#", type).replace("#propertyName#",
+                    getKeyPath(entryMap)), parameters( "id", id, "value",
+                    getValueOfNestedMap(entryMap) ));
         }
     }
 
@@ -272,6 +274,9 @@ public class ContentfulNeo4jService {
         boolean spacePublished = spaceJson.getBoolean("published");
         String spaceRelation = spaceJson.query("/system/type").toString();
         String spaceLinkType = spaceJson.query("/system/linkType").toString();
+        logger.info("processContentfulSystemMap: " + String.format("spaceId: %s, spaceArchived: %s, " +
+                "spacePublished: %s, spaceRelation: %s, spaceLinkType: %s", spaceId, spaceArchived,
+                spacePublished, spaceRelation, spaceLinkType));
 
         // create space
 //        String spaceCreation = "MERGE (n:Space { id : {spaceId} }) SET n.archived = $spaceArchived, " +
@@ -415,9 +420,8 @@ public class ContentfulNeo4jService {
     public JSONArray getOrphanNodes() {
         JSONArray jsonArray = new JSONArray();
         Gson gson = new Gson();
-        String cypherStatement = "MATCH (a) WHERE NOT (a)-[]-() RETURN a";
         try( Session session = driver.session()) {
-            StatementResult result = session.run("MATCH (a) WHERE NOT (a)-[]-() RETURN a");
+            Result result = session.run("MATCH (a) WHERE NOT (a)-[]-() RETURN a");
             while ( result.hasNext() ) {
                 Record record = result.next();
                 jsonArray.put(gson.toJson(record.asMap()));
@@ -426,26 +430,25 @@ public class ContentfulNeo4jService {
         return jsonArray;
     }
 
-    @SuppressWarnings("unchecked")
     public void createAssetNode(String jsonEntryArrayString) {
         logger.info("receive asset json: " + jsonEntryArrayString);
         JSONArray jsonArray = new JSONArray(jsonEntryArrayString);
         logger.info("size of json array: " + jsonArray.length());
         jsonArray.toList().stream()
-                .map(HashMap.class::cast)
+                .map(Map.class::cast)
                 .filter(jsonMap -> Objects.isNull(jsonMap.get("archived")) ||
                         !Boolean.valueOf(jsonMap.get("archived").toString()))
                 .filter(jsonMap -> Objects.isNull(jsonMap.get("published")) ||
                         Boolean.valueOf(jsonMap.get("published").toString()))
                 .forEach(this::processContentfulJSONMap);
     }
-    @SuppressWarnings("unchecked")
+
     public void createLocaleNode(String jsonEntryArrayString) {
         logger.info("receive locale json: " + jsonEntryArrayString);
         JSONArray jsonArray = new JSONArray(jsonEntryArrayString);
         logger.info("size of json array: " + jsonArray.length());
         jsonArray.toList().stream()
-                .map(HashMap.class::cast)
+                .map(Map.class::cast)
                 .filter(jsonMap -> Objects.isNull(jsonMap.get("archived")) ||
                         !Boolean.valueOf(jsonMap.get("archived").toString()))
                 .filter(jsonMap -> Objects.isNull(jsonMap.get("published")) ||

@@ -1,4 +1,4 @@
-package myproject.meetup.contentful.productcatalog.service;
+package myproject.contentful.productcatalog.service;
 
 import org.springframework.stereotype.Service;
 
