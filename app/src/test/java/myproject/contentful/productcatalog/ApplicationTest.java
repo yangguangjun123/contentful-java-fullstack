@@ -1,8 +1,11 @@
 package myproject.contentful.productcatalog;
 
+import myproject.contentful.productcatalog.api.ContentfulNeo4jController;
+import myproject.contentful.productcatalog.service.ContentfulService;
 import myproject.contentful.productcatalog.service.Neo4jDatabaseService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,16 +19,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
 @AutoConfigureMockMvc
 @SpringBootTest
 public class ApplicationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
     @MockBean
     private Neo4jDatabaseService neo4jService;
+
+    @MockBean
+    private ContentfulService contentfulService;
+
+    @InjectMocks
+    private ContentfulNeo4jController contentfulNeo4jController;
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Test
     public void shouldReturnDefaultPage() throws Exception {

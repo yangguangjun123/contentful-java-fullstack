@@ -6,7 +6,7 @@ import org.springframework.context.annotation.PropertySource;
 
 @SuppressWarnings("unused")
 @Configuration
-@PropertySource("classpath:application.properties")
+//@PropertySource("classpath:application.properties")
 @ConfigurationProperties(prefix = "neo4j")
 public class Neo4jProperties {
     private String dburl;

@@ -6,10 +6,10 @@ import myproject.contentful.productcatalog.api.ContentfulNeo4jController;
 import myproject.contentful.productcatalog.api.ContentfulNeo4jTransformationController;
 import myproject.contentful.productcatalog.config.ContentfulProperties;
 import myproject.contentful.productcatalog.config.Neo4jProperties;
+import myproject.contentful.productcatalog.service.ContentfulService;
 import myproject.contentful.productcatalog.service.Neo4jDatabaseService;
 import myproject.contentful.productcatalog.web.ProductWebController;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,7 +18,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
 public class SmokeTest {
 
@@ -36,6 +35,9 @@ public class SmokeTest {
 
     @MockBean
     private Neo4jDatabaseService neo4jService;
+
+    @MockBean
+    private ContentfulService contentfulService;
 
     @InjectMocks
     private ContentfulNeo4jController contentfulNeo4jController;
