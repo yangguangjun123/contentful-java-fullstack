@@ -1,8 +1,8 @@
 {
-  "name": "Contentful Java Fullstack",
-  "description": "Get started using Contentful, Spring Boot Java and Neo4j",
-  "repository": "https://github.com/yangguangjun123/contentful-java-fullstack",
-  "website": "https://contentful.com",
+  "name": "An Integrated Java Spring Boot Application of Contentful and Neo4j",
+  "description": "The application is developed to analyze the orphan entities in the contentful space",
+  "repository": "https://github.com/yangguangjun123/contentful-neo4j-java",
+  "website": "https://github.com/yangguangjun123/contentful-neo4j-java",
   "logo": "",
-  "keywords": ["java", "spring", "spring boot", "contentful", "neo4j", "getting started", "guide"]
+  "keywords": ["Java", "contentful", "neo4j","spring", "spring boot"]
 }
