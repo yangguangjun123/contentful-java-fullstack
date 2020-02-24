@@ -1,3 +1,3 @@
-rootProject.name = 'contentful-neo4j-java'
+rootProject.name = 'contentful-neo4j-transform'
 
 include 'app'
