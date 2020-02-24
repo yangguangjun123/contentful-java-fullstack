@@ -1,5 +1,6 @@
 package myproject.contentful.productcatalog.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -9,8 +10,14 @@ import org.springframework.context.annotation.PropertySource;
 //@PropertySource("classpath:application.properties")
 @ConfigurationProperties(prefix = "neo4j")
 public class Neo4jProperties {
+
+    @Value("{GRAPHENEDB_BOLT_URL}")
     private String dburl;
+
+    @Value("{GRAPHENEDB_BOLT_USER}")
     private String dbuser;
+
+    @Value("{GRAPHENEDB_BOLT_PASSWORD}")
     private String dbpassword;
 
     public String getDburl() {
