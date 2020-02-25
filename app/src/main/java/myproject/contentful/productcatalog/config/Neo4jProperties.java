@@ -11,13 +11,13 @@ import org.springframework.context.annotation.PropertySource;
 @ConfigurationProperties(prefix = "neo4j")
 public class Neo4jProperties {
 
-    @Value("{GRAPHENEDB_BOLT_URL}")
+    @Value("${GRAPHENEDB_BOLT_URL}")
     private String dburl;
 
-    @Value("{GRAPHENEDB_BOLT_USER}")
+    @Value("${GRAPHENEDB_BOLT_USER}")
     private String dbuser;
 
-    @Value("{GRAPHENEDB_BOLT_PASSWORD}")
+    @Value("${GRAPHENEDB_BOLT_PASSWORD}")
     private String dbpassword;
 
     public String getDburl() {
