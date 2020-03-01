@@ -42,7 +42,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.contentful.java:java-sdk:10.4.1'
     implementation 'com.contentful.java:cma-sdk:3.3.2'
-    implementation 'org.neo4j.driver:neo4j-java-driver:4.0.0'
+    implementation 'org.neo4j.driver:neo4j-java-driver:1.6.3'
     implementation 'org.json:json:20190722'
     implementation 'com.jayway.jsonpath:json-path:2.4.0'
 

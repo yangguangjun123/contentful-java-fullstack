@@ -5,12 +5,12 @@ import com.jayway.jsonpath.JsonPath;
 import myproject.contentful.productcatalog.config.Neo4jProperties;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
-import org.neo4j.driver.Record;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Record;
+import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.StatementResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static org.neo4j.driver.Values.parameters;
+import static org.neo4j.driver.v1.Values.parameters;
 
 @SuppressWarnings("unchecked")
 @Service
@@ -70,7 +70,7 @@ public class Neo4jDatabaseService {
         JSONArray jsonArray = new JSONArray();
         Gson gson = new Gson();
         try (Session session = driver.session()) {
-            Result result = session.run("MATCH (n) RETURN n");
+            StatementResult result = session.run("MATCH (n) RETURN n");
             while ( result.hasNext() ) {
                 Record record = result.next();
                 jsonArray.put(gson.toJson(record.asMap()));
@@ -421,7 +421,7 @@ public class Neo4jDatabaseService {
         JSONArray jsonArray = new JSONArray();
         Gson gson = new Gson();
         try( Session session = driver.session()) {
-            Result result = session.run("MATCH (a) WHERE NOT (a)-[]-() RETURN a");
+            StatementResult result = session.run("MATCH (a) WHERE NOT (a)-[]-() RETURN a");
             while ( result.hasNext() ) {
                 Record record = result.next();
                 jsonArray.put(gson.toJson(record.asMap()));
