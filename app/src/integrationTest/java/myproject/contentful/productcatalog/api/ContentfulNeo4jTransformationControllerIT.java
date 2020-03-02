@@ -11,7 +11,6 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -26,8 +25,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ContentfulNeo4jTransformationControllerIT {
 
-    @Value("${application.root:}")
-    private String applicationRoot;
+    @LocalServerPort
+    private String port;
 
     private TestRestTemplate restTemplate;
 
@@ -122,7 +121,7 @@ public class ContentfulNeo4jTransformationControllerIT {
     }
 
     private String createURLWithPort(String uri) {
-        return applicationRoot + uri;
+        return "http://localhost:" + port + "/" + uri;
     }
 
 }
