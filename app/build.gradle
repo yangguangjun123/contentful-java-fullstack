@@ -75,3 +75,7 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTest
+
+bootJar {
+    mainClassName = "myproject.contentful.productcatalog.Main"
+}
