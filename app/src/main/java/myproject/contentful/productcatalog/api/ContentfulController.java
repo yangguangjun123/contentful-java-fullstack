@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @SuppressWarnings("unused")
 @RestController
-@RequestMapping(value = "/contentful", produces={"application/json","application/xml"})
+@RequestMapping(value = "/contentful", produces={"application/json"})
 public class ContentfulController {
     private final ContentfulService contentfulService;
 

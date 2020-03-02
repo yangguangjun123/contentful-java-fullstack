@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @SuppressWarnings("unused")
 @RestController
-@RequestMapping(value = "/contentful/neo4j/transform", produces={"application/json","application/xml"})
+@RequestMapping(value = "/contentful/neo4j/transform", produces={"application/json"})
 public class ContentfulNeo4jTransformationController {
 
     private final ContentfulNeo4jTransformationService contentfulNeo4jTransformationService;

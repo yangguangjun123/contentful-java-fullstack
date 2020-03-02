@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/contentful", produces={"application/json","application/xml"})
+@RequestMapping(value = "/contentful", produces={"application/json"})
 @SuppressWarnings("unused")
 public class ContentfulAnalyticsController {
 

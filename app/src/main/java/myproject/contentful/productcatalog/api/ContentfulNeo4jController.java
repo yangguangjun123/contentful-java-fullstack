@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @SuppressWarnings("unused")
 @RestController
-@RequestMapping(value = "/contentful/neo4j", produces={"application/json","application/xml"})
+@RequestMapping(value = "/contentful/neo4j", produces={"application/json"})
 public class ContentfulNeo4jController {
 
     private final Neo4jDatabaseService neo4jDatabaseService;
